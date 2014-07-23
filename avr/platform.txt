@@ -12,12 +12,12 @@ version=0.1.0
 # --------------------- 
 
 # Default "compiler.path" is correct, change only if you want to overidde the initial value
-#compiler.path={ide.path}/tools/avr/bin/..
+compiler.path={runtime.ide.path}/hardware/tools/avr/bin/
 
 # Use external AVR for Mac, integrated one doesnt support atmega256rfr2
-compiler.path=/usr/local/CrossPack-AVR/bin/
-compiler.path.windows={runtime.hardware.path}\..\tools\avr\bin\
-compiler.path.linux={runtime.hardware.path}/../tools/avr/bin/
+#compiler.path=/usr/local/CrossPack-AVR/bin/
+#compiler.path.windows={runtime.hardware.path}\..\tools\avr\bin\
+#compiler.path.linux={runtime.hardware.path}/../tools/avr/bin/
 
 compiler.c.cmd=avr-gcc
 compiler.c.flags=-c -g -Os -w -ffunction-sections -fdata-sections -MMD
@@ -72,18 +72,18 @@ recipe.size.regex.eeprom=^(?:\.eeprom)\s+([0-9]+).*
 # ------------------------------
 
 # Default values:
-#tools.avrdude.cmd.path={runtime.ide.path}/hardware/tools/avr/bin/avrdude
-#tools.avrdude.config.path={runtime.ide.path}/hardware/tools/avr/etc/avrdude.conf
+tools.avrdude.cmd.path={runtime.ide.path}/hardware/tools/avr/bin/avrdude
+tools.avrdude.config.path={runtime.ide.path}/hardware/tools/avr/etc/avrdude.conf
 
 # Use external AVR for Mac and Windows, integrated one doesnt support atmega256rfr2
-tools.avrdude.cmd.path=/usr/local/CrossPack-AVR/bin/avrdude
-tools.avrdude.config.path=/usr/local/CrossPack-AVR/etc/avrdude.conf
+#tools.avrdude.cmd.path=/usr/local/CrossPack-AVR/bin/avrdude
+#tools.avrdude.config.path=/usr/local/CrossPack-AVR/etc/avrdude.conf
 
-tools.avrdude.cmd.path.windows={runtime.hardware.path}\..\tools\avr\bin\avrdude
-tools.avrdude.config.path.windows={runtime.hardware.path}\..\tools\avr\etc\avrdude.conf
+#tools.avrdude.cmd.path.windows={runtime.hardware.path}\..\tools\avr\bin\avrdude
+#tools.avrdude.config.path.windows={runtime.hardware.path}\..\tools\avr\etc\avrdude.conf
 
-tools.avrdude.cmd.path.linux={runtime.hardware.path}/../tools/avrdude
-tools.avrdude.config.path.linux={runtime.hardware.path}/../tools/avrdude.conf
+#tools.avrdude.cmd.path.linux={runtime.hardware.path}/../tools/avrdude
+#tools.avrdude.config.path.linux={runtime.hardware.path}/../tools/avrdude.conf
 
 tools.avrdude.upload.params.verbose=-v -v -v -v
 tools.avrdude.upload.params.quiet=-q -q
