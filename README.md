@@ -4,6 +4,7 @@ Contents/Contenido:
 
 * * *
 <div id="English"></div>
+# English
 # Altair Hardware Definition and Libraries for the Arduino IDE
 
 ## Installation:
@@ -38,6 +39,7 @@ git clone https://github.com/makerlabmx/altair.git altair
 
 * * *
 <div id="Spanish"></div>
+# Spanish
 # Bibliotecas y definición de hardware de Altair para el IDE de Arduino
 
 ## Instalación:
