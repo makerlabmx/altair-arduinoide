@@ -13,8 +13,13 @@ Install Arduino IDE version 1.5.7 BETA or newer for your OS:
 - Mac OSX: [OSX 10.7 or greater](http://downloads.arduino.cc/arduino-1.5.7-macosx-java7-r2.zip), [older OSX](http://downloads.arduino.cc/arduino-1.5.7-macosx.zip)
 - Linux: [32 bit](http://downloads.arduino.cc/arduino-1.5.7-linux32.tgz), [64 bit](http://downloads.arduino.cc/arduino-1.5.7-linux64.tgz)
 
+Install the USB drivers:
+- Windows and OSX: [FTDI Drivers](http://www.ftdichip.com/Drivers/VCP.htm)
+- Linux: Should be already included in your Distros Kernel, if not, check the link above.
+
 Clone this repo inside the "hardware" floder inside your sketch folder as "altair".
-(Create it if it doesn't exist)
+Alternatively, You can download the zip, uncompress it and manually copy it.
+(Create the folder if it doesn't exist)
 
 Example:
 ```
@@ -42,7 +47,12 @@ Instala el IDE de Arduino versión 1.5.7 BETA o superior para tu sistema operati
 - Mac OSX: [OSX 10.7 o superior](http://downloads.arduino.cc/arduino-1.5.7-macosx-java7-r2.zip), [OSX más antiguo](http://downloads.arduino.cc/arduino-1.5.7-macosx.zip)
 - Linux: [32 bit](http://downloads.arduino.cc/arduino-1.5.7-linux32.tgz), [64 bit](http://downloads.arduino.cc/arduino-1.5.7-linux64.tgz)
 
+Instala los drivers USB:
+- Windows y OSX: [FTDI Drivers](http://www.ftdichip.com/Drivers/VCP.htm)
+- Linux: Ya deben de estar incluidos en el kernel de tu distribución, si no es así, checa el link anterior.
+
 Clona este repositorio dentro de la carpeta "hardware" en la carpeta de sketchs de arduino, respetando el nombre "altair".
+Alternativamente puedes descargar el zip, descomprimirlo y copiarlo manualmente.
 (Si no existe la carpeta, créala)
 
 Ejemplo:
