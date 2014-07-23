@@ -1,0 +1,33 @@
+# Aquila platform
+menu.cpu=Processor
+
+##############################################################
+
+altair.name=Altair
+altair.cpu=atmega256rfr2
+
+altair.upload.tool=avrdude
+altair.upload.protocol=wiring
+
+altair.bootloader.tool=avrdude
+
+altair.build.f_cpu=16000000L
+altair.build.core=arduino
+altair.build.variant=altair
+altair.build.board=ALTAIR
+# Workaround for https://github.com/arduino/Arduino/pull/1695
+altair.build.extra_flags=-D__PROG_TYPES_COMPAT__
+
+altair.menu.cpu.atmega256rfr2=ATmega256RFR2
+altair.menu.cpu.atmega256rfr2.build.mcu=atmega256rfr2
+altair.menu.cpu.atmega256rfr2.upload.maximum_size=253952
+altair.menu.cpu.atmega256rfr2.upload.speed=115200
+altair.menu.cpu.atmega256rfr2.bootloader.low_fuses=0xFF
+altair.menu.cpu.atmega256rfr2.bootloader.high_fuses=0xD0
+altair.menu.cpu.atmega256rfr2.bootloader.extended_fuses=0xFE
+altair.menu.cpu.atmega256rfr2.bootloader.unlock_bits=0x3F
+altair.menu.cpu.atmega256rfr2.bootloader.lock_bits=0x0F
+# altair.menu.cpu.atmega256rfr2.bootloader.path=stk500boot_atmega256rfr2
+# altair.menu.cpu.atmega256rfr2.bootloader.file=stk500boot_v2_m256rfr2.hex
+
+##############################################################
