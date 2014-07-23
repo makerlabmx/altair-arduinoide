@@ -17,7 +17,7 @@ Install the USB drivers:
 - Windows and OSX: [FTDI Drivers](http://www.ftdichip.com/Drivers/VCP.htm)
 - Linux: Should be already included in your Distros Kernel, if not, check the link above.
 
-Clone this repo inside the "hardware" floder inside your sketch folder as "altair".
+Clone this repo inside the "hardware" folder inside your sketch folder as "altair".
 Alternatively, You can download the zip, uncompress it and manually copy it.
 (Create the folder if it doesn't exist)
 
@@ -30,7 +30,7 @@ git clone https://github.com/makerlabmx/altair.git altair
 ## Use:
 
 - Open the Arduino IDE
-- Conect your Altair via the USB-Serial to your PC
+- Connect your Altair via the USB-Serial to your PC
 - In the menu bar, select Tools > Board > altair
 - Select the correct serial port in Tools > Port
 - For an example on using the Aquila libraries, select File > Examples > Aquila > template
