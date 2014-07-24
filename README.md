@@ -25,7 +25,7 @@ Alternatively, You can download the zip, uncompress it and manually copy it.
 Example:
 ```
 cd <path to your home folder>/Arduino/hardware/
-git clone https://github.com/makerlabmx/altair.git altair
+git clone https://github.com/makerlabmx/altair-arduinoide.git altair
 ```
 
 ## Use:
@@ -60,7 +60,7 @@ Alternativamente puedes descargar el zip, descomprimirlo y copiarlo manualmente.
 Ejemplo:
 ```
 cd <dirección de tu carpeta personal>/Arduino/hardware/
-git clone https://github.com/makerlabmx/altair.git altair
+git clone https://github.com/makerlabmx/altair-arduinoide.git altair
 ```
 
 ## Uso:
