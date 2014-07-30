@@ -13,6 +13,11 @@ void AquilaProtocol::loop()
 	Protocol_loop(&protocol);
 }
 
+void AquilaProtocol::setPAN(uint16_t pan)
+{
+	Protocol_setPAN(&protocol, pan);
+}
+
 void AquilaProtocol::setClass(char *nid)
 {
 	Protocol_setId(&protocol, nid);

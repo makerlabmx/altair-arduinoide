@@ -46,6 +46,11 @@ void Protocol_init(Protocol *self)
 
 }
 
+void Protocol_setPAN(Protocol *self, uint16_t pan)
+{
+	Phy_setPan(&self->phy, pan);
+}
+
 void Protocol_loop(Protocol *self)
 {
 	Phy_loop(&self->phy);

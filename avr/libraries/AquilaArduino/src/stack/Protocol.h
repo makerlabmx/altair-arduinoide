@@ -96,6 +96,8 @@ typedef struct
 
 void Protocol_init(Protocol *self);
 
+void Protocol_setPAN(Protocol *self, uint16_t pan);
+
 void Protocol_setId(Protocol *self, char *nid);
 
 void Protocol_setName(Protocol *self, char *nName);

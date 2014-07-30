@@ -25,6 +25,8 @@ public:
 
 	void loop();
 
+	void setPAN(uint16_t pan);
+
 	void setClass(char *nid);
 
 	void setName(char *nName);
