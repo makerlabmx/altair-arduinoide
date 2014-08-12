@@ -1,4 +1,4 @@
-#include "protocol.h"
+#include "Protocol.h"
 
 volatile uint8_t flagGotPacket;
 
