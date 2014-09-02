@@ -1,6 +1,33 @@
 #include "AquilaBridge.h"
+#include "RingBuffer.h"
+
+#define TX_BUFFER_SIZE 132
 
 uint8_t bridgeAddress[8];
+
+uint8_t comTxBuffer[TX_BUFFER_SIZE];
+RingBuffer pktRxBuffer;
+
+// Based on version from: http://www.gaw.ru/pdf/Atmel/app/avr/AVR350.pdf
+uint16_t calcrc(uint8_t *ptr, int count)
+{
+	int crc;
+	char i;
+	crc = 0;
+	while (--count >= 0)
+	{
+		crc = crc ^ (int) *ptr++ << 8;
+		i = 8;
+		do
+		{
+			if (crc & 0x8000)
+			crc = crc << 1 ^ 0x1021;
+			else
+			crc = crc << 1;
+		} while(--i);
+	}
+	return (crc);
+}
 
 bool getChTimeOut(uint8_t *c, long timeOut)
 {
@@ -15,74 +42,92 @@ bool getChTimeOut(uint8_t *c, long timeOut)
 	return true;
 }
 
-void sendPreamble()
+void appendCRC(uint8_t buffer[], uint8_t size)
 {
+	uint16_t crc = calcrc(buffer, size);
+	buffer[size] = (uint8_t)(crc >> 8);
+	buffer[size + 1] = (uint8_t)(crc);
+}
+
+void sendBuffer(uint8_t buffer[], uint8_t size)
+{
+	//appendCRC(buffer, size);
+	// CRC is 16bits (2 bytes), now buffer size is 2 bytes more.
+	//size += 2;
+
+	uint8_t i;
+	// Preamble:
 	putchar(0xAA);
 	putchar(0x55);
 	putchar(0xAA);
 	putchar(0x55);
+	// Data:
+	for(i = 0; i < size; i++)
+	{
+		putchar(buffer[i]);
+	}
 }
 
 void sendStart()
 {
-	sendPreamble();
-	putchar(CMD_START);
+	comTxBuffer[0] = CMD_START;
+	sendBuffer(comTxBuffer, 1);
 }
 
 void sendSuccess()
 {
-	sendPreamble();
-	putchar(CMD_SUCCESS);
+	comTxBuffer[0] = CMD_SUCCESS;
+	sendBuffer(comTxBuffer, 1);
 }
 
 void sendError()
 {
-	sendPreamble();
-	putchar(CMD_ERROR);
+	comTxBuffer[0] = CMD_ERROR;
+	sendBuffer(comTxBuffer, 1);
 }
 
 void sendProm(bool isProm)
 {
-	sendPreamble();
-	putchar(CMD_SET_PROM);
-	putchar((uint8_t) isProm);
+	comTxBuffer[0] = CMD_SET_PROM;
+	comTxBuffer[1] = (uint8_t) isProm;
+	sendBuffer(comTxBuffer, 2);
 }
 
 void sendPan(uint16_t pan)
 {
-	sendPreamble();
-	putchar(CMD_SET_PAN);
-	putchar((uint8_t) (pan & 0xFF));
-	putchar((uint8_t) (pan >> 8));
+	comTxBuffer[0] = CMD_SET_PAN;
+	comTxBuffer[1] = (uint8_t) (pan & 0xFF);
+	comTxBuffer[2] = (uint8_t) (pan >> 8);
+	sendBuffer(comTxBuffer, 3);
 }
 
 void sendChan(uint8_t chan)
 {
-	sendPreamble();
-	putchar(CMD_SET_CHAN);
-	putchar(chan);
+	comTxBuffer[0] = CMD_SET_CHAN;
+	comTxBuffer[1] = chan;
+	sendBuffer(comTxBuffer, 2);
 }
 
 void sendShortAddr(uint16_t addr)
 {
-	sendPreamble();
-	putchar(CMD_SET_SHORT_ADDR);
-	putchar((uint8_t) (addr & 0xFF));
-	putchar((uint8_t) (addr >> 8));
+	comTxBuffer[0] = CMD_SET_SHORT_ADDR;
+	comTxBuffer[1] = (uint8_t) (addr & 0xFF);
+	comTxBuffer[2] = (uint8_t) (addr >> 8);
+	sendBuffer(comTxBuffer, 3);
 }
 
 void sendLongAddr(uint8_t addr[])
 {
-	sendPreamble();
-	putchar(CMD_SET_LONG_ADDR);
-	putchar(addr[0]);
-	putchar(addr[1]);
-	putchar(addr[2]);
-	putchar(addr[3]);
-	putchar(addr[4]);
-	putchar(addr[5]);
-	putchar(addr[6]);
-	putchar(addr[7]);
+	comTxBuffer[0] = CMD_SET_LONG_ADDR;
+	comTxBuffer[1] = addr[0];
+	comTxBuffer[2] = addr[1];
+	comTxBuffer[3] = addr[2];
+	comTxBuffer[4] = addr[3];
+	comTxBuffer[5] = addr[4];
+	comTxBuffer[6] = addr[5];
+	comTxBuffer[7] = addr[6];
+	comTxBuffer[8] = addr[7];
+	sendBuffer(comTxBuffer, 9);
 }
 
 void PHY_DataConf(uint8_t status)
@@ -109,25 +154,31 @@ void PHY_DataConf(uint8_t status)
 // Called on rx success, gets rx data
 void PHY_DataInd(PHY_DataInd_t *ind)
 {
-    // Sending data to PC:
-    //delay(20);
-    sendPreamble();
-	putchar(CMD_DATA);
-	putchar(ind->lqi);
-	putchar(ind->rssi);
-	putchar(ind->size);
-
-    uint8_t i = 0;
-    for(i = 0; i < ind->size; i++)
+	// Adding received packet to buffer
+	// If buffer is full, ignore packet (lost)
+    if(!RingBuffer_isFull(&pktRxBuffer))
     {
-        putchar(ind->data[i]);
+    	uint8_t i = 0, j = 0;
+    	RingBufferData data;
+    	data.size = ind->size + 4;
+
+    	data.data[j++] = CMD_DATA;
+    	data.data[j++] = ind->lqi;
+    	data.data[j++] = ind->rssi;
+    	data.data[j++] = ind->size;
+	    for(i = 0; i < ind->size; i++)
+	    {
+	        data.data[j++] = ind->data[i];
+	    }
+    	RingBuffer_insert(&pktRxBuffer, &data);
     }
+
 }
 
 bool serialHandler()
 {
 	uint8_t temp, command, size, data[MAX_FRAME_SIZE], longAddr[8];
-	uint16_t pan, shortAddr;
+	uint16_t pan, shortAddr, recCrc, calcCrc;
 	int i;
 	//Getting header
 	if(!getChTimeOut(&temp, TIMEOUT)) return false;
@@ -157,6 +208,11 @@ bool serialHandler()
 			{
 				if(!getChTimeOut(&data[i], TIMEOUT)) return false;
 			}
+			//getting CRC:
+			/*if(!getChTimeOut(&temp, TIMEOUT)) return false;
+			recCrc = (temp << 8) & 0xFF00;
+			if(!getChTimeOut(&temp, TIMEOUT)) return false;
+			recCrc |= temp & 0x00FF;*/													// TERMINAR DE IMPLEMENTAR
 
     		PHY_DataReq(data, size);
 
@@ -240,6 +296,7 @@ bool Bridge_init(uint8_t channel, uint16_t pan, bool promiscuous)
     PHY_SetLongAddr(bridgeAddress);
 	PHY_SetPromiscuous(promiscuous);
     PHY_SetRxState(true);
+    RingBuffer_init(&pktRxBuffer);
 	Serial_init();
 	// Anounce bridge ready to PC
 	sendStart();
@@ -252,4 +309,10 @@ void Bridge_loop()
 {
 	PHY_TaskHandler();
 	if(Serial_available()) serialHandler();
+	if(!RingBuffer_isEmpty(&pktRxBuffer))
+	{
+		RingBufferData data;
+		RingBuffer_remove(&pktRxBuffer, &data);
+		sendBuffer(data.data, data.size);
+	}
 }

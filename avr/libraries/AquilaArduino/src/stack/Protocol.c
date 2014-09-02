@@ -221,7 +221,10 @@ void Protocol_triggerEvent(Protocol *self, uint8_t event, uint8_t param, bool ha
 	//param byte:
 	if(hasParam) packet[2] = param;
 
+	// Send event to everyone (Almost constant time)
 	Protocol_send(self, BROADCAST, packet, 2 + hasParam);
+	// Check if we are subscribed to our own event (slows down with more entries)
+	Protocol_checkEvent(self, self->phy.localAddress, event, param, hasParam);
 }
 
 void Protocol_requestAction(Protocol *self, uint8_t *address, uint8_t action, uint8_t param, bool hasParam)
