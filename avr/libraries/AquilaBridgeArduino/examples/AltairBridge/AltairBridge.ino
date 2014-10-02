@@ -3,8 +3,8 @@
 
 /*
  *	Update 26/08/14: added command TX buffer and packet RX ring buffer
- *	Update 26/08/14: added 16 bit CRC based on Xmodem: http://www.gaw.ru/pdf/Atmel/app/avr/AVR350.pdf
- *	Serial Bridge Protocol: [PREAMBLE] COMMAND [Command specific][16 bit CRC]
+ *	Update 26/08/14: started implementing 16 bit CRC based on Xmodem: http://www.gaw.ru/pdf/Atmel/app/avr/AVR350.pdf (Not yet active)
+ *	Serial Bridge Protocol: [PREAMBLE] COMMAND [Command specific] ([16 bit CRC] not yet activated)
  *		[PREAMBLE]: 0xAA 0x55 0xAA 0x55
  *		
  *	Comands:
