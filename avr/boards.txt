@@ -26,8 +26,7 @@ altair.menu.cpu.atmega256rfr2.bootloader.low_fuses=0xFF
 altair.menu.cpu.atmega256rfr2.bootloader.high_fuses=0xD0
 altair.menu.cpu.atmega256rfr2.bootloader.extended_fuses=0xFE
 altair.menu.cpu.atmega256rfr2.bootloader.unlock_bits=0x3F
-altair.menu.cpu.atmega256rfr2.bootloader.lock_bits=0x0F
-# altair.menu.cpu.atmega256rfr2.bootloader.path=stk500boot_atmega256rfr2
-# altair.menu.cpu.atmega256rfr2.bootloader.file=stk500boot_v2_m256rfr2.hex
+altair.menu.cpu.atmega256rfr2.bootloader.lock_bits=0x2F
+altair.menu.cpu.atmega256rfr2.bootloader.file=stk500boot_atmega256rfr2/stk500boot_v2_m256rfr2.hex
 
 ##############################################################
