@@ -1,13 +1,14 @@
 #ifndef WirelessSerial_h
 #define WirelessSerial_h
 
+#include <Mesh.h>
 #include <inttypes.h>
 #include "Stream.h"
 
 // Showld be equal or less to the LWM max payload size
-#define WSERIAL_BUFFER_SIZE 96
+#define WSERIAL_BUFFER_SIZE AQUILAMESH_MAXPAYLOAD
 #define WSERIAL_SEND_INTERVAL 1
-#define WSERIAL_ENDPOINT 1
+#define WSERIAL_ENDPOINT 14
 
 class WirelessSerial : public Stream
 {

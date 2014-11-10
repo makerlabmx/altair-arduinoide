@@ -3,7 +3,6 @@
 #include <string.h>
 #include <inttypes.h>
 #include "Arduino.h"
-#include "lwm.h"
 #include "lwm/sys/sys.h"
 #include "lwm/nwk/nwk.h"
 #include "WSerial.h"
@@ -50,7 +49,7 @@ void WirelessSerial::begin(uint16_t destAddr)
 	_rx_buffer_head = _rx_buffer_tail = 0;
 	_tx_buffer_head = _tx_buffer_tail = 0;
 	destAddress = destAddr;
-	SYS_Init();
+	// SYS_Init(); Should init in Mesh.begin()
 	PHY_SetRxState(true);
 	NWK_OpenEndpoint(WSERIAL_ENDPOINT, receiveMessage);
 }
