@@ -60,6 +60,7 @@ extern "C" {
 #define PROTOCOL_COM_EUI 14
 
 #define BROADCAST 0xFFFF
+#define HUB 0x00FF
 
 typedef struct
 {

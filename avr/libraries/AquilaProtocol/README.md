@@ -15,3 +15,5 @@ PROTOCOL_COM_EUI 14
 gets EUI, like get name, but with raw address.
 
 Now we use Aquila.anounce(BROADCAST), and send EUI Address instead of class on end of setup
+
+In event emmit, the EUI Address is appended to the message after param

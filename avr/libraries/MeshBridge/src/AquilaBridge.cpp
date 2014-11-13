@@ -168,7 +168,7 @@ static void txCb(NWK_DataReq_t *req)
 
 void txSend(uint16_t dstAddr, uint8_t srcEndpoint, uint8_t dstEndpoint, uint8_t size, uint8_t *data)
 {
-	if(txDataReqBusy) return;	// lose packet... check alternative TODO
+	if(txDataReqBusy){ sendError(); return; }	// lose packet... check alternative TODO
 
 	static NWK_DataReq_t packet;
 	packet.dstAddr = dstAddr;

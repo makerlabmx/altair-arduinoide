@@ -48,7 +48,7 @@ void setup()
   // Registering event
   buttonPressed = Aquila.addEvent("Button Pressed");
   // Anouncing device
-  Aquila.announce(BROADCAST);
+  Aquila.announce(HUB);
 }
 
 void loop()

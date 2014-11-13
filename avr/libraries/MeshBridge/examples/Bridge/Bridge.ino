@@ -51,7 +51,7 @@
  *
  */
 
-#define ADDRESS 0x2
+#define ADDRESS 0x00FF
 #define CHANNEL 0X1A
 #define PAN 0xCA5A
 #define PROMISCUOUS false

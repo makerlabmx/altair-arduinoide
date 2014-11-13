@@ -13,3 +13,16 @@ With Aquila, endpoints 0 to 7 are free for user's custom implementations, endpoi
 13: Aquila Protocol
 12: Services
 8 - 11: Reserved
+
+
+## Channel
+
+- We are using channel 0X1A by default.
+
+## Automatic Address Assignment:
+
+- Addresses 0x0001 to 0x00FE are only for manual configuration
+- Address 0x00FF is for the bridge.
+- Addresses 0x0100 to 0xFFFD are for automatic assignment
+- Address 0xFFFE is reserved in 802.15.4 standard
+- Address 0xFFFF is the BROADCAST address.

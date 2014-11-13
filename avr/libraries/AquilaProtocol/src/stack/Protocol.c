@@ -73,7 +73,7 @@ void Protocol__parsePacket(Protocol *self)
 	bool hasParam = (bool) (pktControl>>PROTOCOL_HAS_PARAM & 0x01);
 	bool hasData = (bool) (pktControl>>PROTOCOL_HAS_DATA & 0x01);
 
-	uint8_t command, param = 0;
+	uint8_t command, param = 0, index;
 	uint8_t EUIAddress[PROTOCOL_EUIADDRESSLEN];
 	Entry entry;
 
@@ -182,11 +182,12 @@ void Protocol__parsePacket(Protocol *self)
 			break;
 
 		case PROTOCOL_EVENT:
-			if(dataLen < 3 + hasParam) { return; }
-			command = data[2];
-			if(hasParam) param = data[3];
+			if(dataLen < 3 + hasParam + PROTOCOL_EUIADDRESSLEN) { return; }
+			index = 2;
+			command = data[index++];
+			if(hasParam) param = data[index++];
 			// Get EUI Address
-			memcpy(EUIAddress, &data[4], PROTOCOL_EUIADDRESSLEN);	// TODO: test this
+			memcpy(EUIAddress, &data[index], PROTOCOL_EUIADDRESSLEN);	// TODO: test this
 			Protocol_checkEvent(self, EUIAddress, command, param, hasParam);
 			return;
 			break;
@@ -232,17 +233,18 @@ void Protocol_send(Protocol *self, uint16_t address, char *command, uint8_t size
 void Protocol_emitEvent(Protocol *self, uint8_t event, uint8_t param, bool hasParam)
 {
 	char packet[3 + PROTOCOL_EUIADDRESSLEN];
+	uint8_t index = 0;
 	//control byte:
-	packet[0] = PROTOCOL_EVENT<<PROTOCOL_COMMAND_TYPE | hasParam<<PROTOCOL_HAS_PARAM | 0<<PROTOCOL_HAS_DATA;
+	packet[index++] = PROTOCOL_EVENT<<PROTOCOL_COMMAND_TYPE | hasParam<<PROTOCOL_HAS_PARAM | 1<<PROTOCOL_HAS_DATA;
 	//command byte:
-	packet[1] = event;
+	packet[index++] = event;
 	//param byte:
-	if(hasParam) packet[2] = param;
+	if(hasParam) packet[index++] = param;
 	//Append EUIAddress, as unique identifier for event configuration
-	memcpy(&packet[3], self->EUIAddress, PROTOCOL_EUIADDRESSLEN);
+	memcpy(&packet[index], self->EUIAddress, PROTOCOL_EUIADDRESSLEN);
 
 	// Send event to everyone (Almost constant time)
-	Protocol_send(self, BROADCAST, packet, 3 + PROTOCOL_EUIADDRESSLEN);
+	Protocol_send(self, BROADCAST, packet, index + PROTOCOL_EUIADDRESSLEN);
 	// Check if we are subscribed to our own event (slows down with more entries)
 	Protocol_checkEvent(self, self->EUIAddress, event, param, hasParam);
 }
