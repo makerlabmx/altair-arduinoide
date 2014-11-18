@@ -2,8 +2,6 @@
 #include <Mesh.h>
 #include <AquilaProtocol.h>
 
-#define ADDR 8
-
 /*
   Example_RemoteRGBFade
   In this example we will be able to
@@ -53,7 +51,7 @@ void setup()
   digitalWrite(LEDG, HIGH);
   digitalWrite(LEDB, HIGH);
   
-  Mesh.begin(ADDR);
+  Mesh.begin();
   Aquila.begin();
   Aquila.setClass("mx.makerlab.rgb");
   Aquila.setName("RGB");

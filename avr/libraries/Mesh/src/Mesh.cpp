@@ -6,8 +6,11 @@
 #include "lwm/nwk/nwk.h"
 #include "Mesh.h"
 
-// Debug:
+//#define MESH_DEBUG
+
+#ifdef MESH_DEBUG
 #include "stack/halSerial.h"
+#endif
 
 #define MESH_ADDRENDPOINT 15
 
@@ -45,7 +48,9 @@ static bool addrCb(NWK_DataInd_t *ind)
 
 static void pingCb(NWK_DataReq_t *req)
 {
+	#ifdef MESH_DEBUG
 	printf("pingCb, status: %x\n", req->status);
+	#endif
 	waitingAddrConfirm = false;
 
 	if(req->status == NWK_SUCCESS_STATUS)
@@ -58,8 +63,9 @@ static void pingCb(NWK_DataReq_t *req)
 		addrAssignSuccess = true;
 		shortAddr = genAddr;
 		NWK_SetAddr(shortAddr);
-		//printf("%x\n", genAddr);
-
+		#ifdef MESH_DEBUG
+		printf("%x\n", genAddr);
+		#endif
 	}
 
 	(void)req;
@@ -68,7 +74,9 @@ static void pingCb(NWK_DataReq_t *req)
 // Begin with automatic address
 void AquilaMesh::begin()
 {
+	#ifdef MESH_DEBUG
 	Serial_init();
+	#endif
 	uint8_t id[8];
 	ID_init();
 	ID_getId(id);
@@ -78,7 +86,7 @@ void AquilaMesh::begin()
 	if(genAddr < 256) genAddr += 256;
 
 	//test collision:
-	genAddr = 1;
+	//genAddr = 3;
 
 	// Init as address 0:
 	begin(0);
@@ -90,7 +98,7 @@ void AquilaMesh::begin()
 		packet.dstAddr = genAddr;
 		packet.dstEndpoint = MESH_ADDRENDPOINT;
 		packet.srcEndpoint = MESH_ADDRENDPOINT;
-		packet.options = NWK_OPT_ACK_REQUEST;
+		packet.options = NWK_OPT_ACK_REQUEST | NWK_OPT_ENABLE_SECURITY;	// Don't know why, but without NWK_OPT_ENABLE_SECURITY, it doesn't work
 		packet.data = NULL;
 		packet.size = 0;
 		packet.confirm = pingCb;

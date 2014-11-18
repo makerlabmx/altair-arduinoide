@@ -2,8 +2,6 @@
 #include <Mesh.h>
 #include <AquilaProtocol.h>
 
-#define ADDR 6
-
 #define PIR 18
 #define LED 15
 
@@ -19,7 +17,7 @@ void setup()
   pinMode(LED, OUTPUT);
   digitalWrite(LED, HIGH);
   
-  Mesh.begin(ADDR);
+  Mesh.begin();
   Aquila.begin();
   Aquila.setClass("mx.makerlab.movement");
 

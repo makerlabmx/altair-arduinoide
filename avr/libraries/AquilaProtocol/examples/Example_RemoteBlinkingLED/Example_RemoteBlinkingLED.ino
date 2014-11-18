@@ -2,8 +2,6 @@
 #include <Mesh.h>
 #include <AquilaProtocol.h>
 
-#define ADDR 7
-
 /*
   Example_RemoteBlinkingLED
   In this example we will be able to
@@ -30,7 +28,7 @@ void setup()
   // Setup the LED
   pinMode(LED, OUTPUT);
   // Aquila protocol setup
-  Mesh.begin(ADDR);
+  Mesh.begin();
   Aquila.begin();
   Aquila.setClass("mx.makerlab.blink");
   Aquila.setName("Blink");

@@ -17,7 +17,7 @@ RingBuffer pktRxBuffer;
 TxRingBuffer txPktBuffer;
 
 // Based on version from: http://www.gaw.ru/pdf/Atmel/app/avr/AVR350.pdf
-uint16_t calcrc(uint8_t *ptr, int count)
+uint16_t Bridge_calcrc(uint8_t *ptr, int count)
 {
 	int crc;
 	char i;
@@ -52,7 +52,7 @@ bool getChTimeOut(uint8_t *c, long timeOut)
 
 void appendCRC(uint8_t buffer[], uint8_t size)
 {
-	uint16_t crc = calcrc(buffer, size);
+	uint16_t crc = Bridge_calcrc(buffer, size);
 	buffer[size] = (uint8_t)(crc >> 8);
 	buffer[size + 1] = (uint8_t)(crc);
 }

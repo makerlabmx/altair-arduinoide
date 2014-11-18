@@ -2,8 +2,6 @@
 #include <Mesh.h>
 #include <AquilaProtocol.h>
 
-#define ADDR 3
-
 /*
   Example_Alarm
   Parts needed: buzzer
@@ -33,7 +31,7 @@ void setup()
   // Setting up the buzzer
   pinMode(BUZZER, OUTPUT);
   // Usual Aquila protocol startup
-  Mesh.begin(ADDR);
+  Mesh.begin();
   Aquila.begin();
   Aquila.setClass("mx.makerlab.alarm");
   Aquila.setName("Alarm");

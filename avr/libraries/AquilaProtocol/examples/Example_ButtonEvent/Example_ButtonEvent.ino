@@ -2,8 +2,6 @@
 #include <Mesh.h>
 #include <AquilaProtocol.h>
 
-#define ADDR 1
-
 /*
   Example_ButtonEvent
   In this example we will use Altair's internal
@@ -41,7 +39,7 @@ void setup()
   // Button setup
   pinMode(BUTTON, INPUT);
   // Aquila setup
-  Mesh.begin(ADDR);
+  Mesh.begin();
   Aquila.begin();
   Aquila.setClass("mx.makerlab.button");
   Aquila.setName("Button");

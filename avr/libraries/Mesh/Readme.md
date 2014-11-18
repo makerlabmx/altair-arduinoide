@@ -21,6 +21,7 @@ With Aquila, endpoints 0 to 7 are free for user's custom implementations, endpoi
 
 ## Automatic Address Assignment:
 
+- Address 0x0000 is reserved for uninitialized address.
 - Addresses 0x0001 to 0x00FE are only for manual configuration
 - Address 0x00FF is for the bridge.
 - Addresses 0x0100 to 0xFFFD are for automatic assignment

@@ -4,8 +4,6 @@
 #include <SimpleTimer.h>
 #include <AltairTemperature.h>
 
-#define ADDR 9
-
 /*
   Example_TemperatureEvent
   In this example, the Altair will emit an event
@@ -42,7 +40,7 @@ bool stopMeasuringTemp(uint8_t param, bool gotParam)
 void setup()
 {
   // Usual Aquila protocol initialization
-  Mesh.begin(ADDR);
+  Mesh.begin();
   Aquila.begin();
   Aquila.setClass("mx.makerlab.thermometer");
   Aquila.setName("Thermometer");

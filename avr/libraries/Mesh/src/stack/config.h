@@ -7,7 +7,9 @@
 #define EEPROM_SIZE 8192
 
 // Baudrate of serial communications (if any)
-#define BAUD 9600
+#ifndef BAUD
+#define BAUD 57600
+#endif
 
 // Max EEPROM bytes used for protocol configuration storage.
 #define PROTOCOL_PERSIST_SIZE 1024

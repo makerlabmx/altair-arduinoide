@@ -188,7 +188,7 @@ void Protocol__parsePacket(Protocol *self)
 			command = data[index++];
 			if(hasParam) param = data[index++];
 			// Get EUI Address
-			memcpy(EUIAddress, &data[index], PROTOCOL_EUIADDRESSLEN);	// TODO: test this
+			memcpy(EUIAddress, &data[index], PROTOCOL_EUIADDRESSLEN);
 			Protocol_checkEvent(self, EUIAddress, command, param, hasParam);
 			return;
 			break;

@@ -2,8 +2,6 @@
 #include <Mesh.h>
 #include <AquilaProtocol.h>
 
-#define ADDR 4
-
 /*
   Example_RemoteFadingLED
   In this example you will be able
@@ -35,7 +33,7 @@ void setup()
 {
   pinMode(LED, OUTPUT);
   
-  Mesh.begin(ADDR);
+  Mesh.begin();
   Aquila.begin();
   Aquila.setClass("mx.makerlab.fade");
   Aquila.setName("Fade");
