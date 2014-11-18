@@ -25,7 +25,8 @@ static bool receiveMessage(NWK_DataInd_t *ind)
 {
 	// Check if its from the address we are expecting, 
 	// ignore otherwise
-	if(ind->srcAddr != destAddress) return false;
+	// If destAddress == BROADCAST, Accept all
+	if(destAddress != BROADCAST && ind->srcAddr != destAddress) return false;
 	// Put received data into rx buffer
 	// if not enough space, drop data :(
 	if(ind->size > (WSERIAL_BUFFER_SIZE - (unsigned int)(WSERIAL_BUFFER_SIZE + _rx_buffer_head - _rx_buffer_tail) % WSERIAL_BUFFER_SIZE) ) return false;

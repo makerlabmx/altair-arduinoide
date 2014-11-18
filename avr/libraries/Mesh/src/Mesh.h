@@ -8,6 +8,8 @@
 #include "lwm/nwk/nwk.h"
 #include "stack/halID.h"
 
+#define BROADCAST 0xFFFF
+
 #define AQUILAMESH_DEFPAN 0xCA5A
 #define AQUILAMESH_DEFCHAN 0x1A
 
@@ -32,6 +34,8 @@ public:
 	void openEndpoint(uint8_t id, bool (*handler)(NWK_DataInd_t *ind));
 
 	uint16_t getShortAddr();
+	// void getEUIAddr(uint8_t* address);	TODO: Implement, change from AquilaProtocol to here.
+
 };
 
 extern AquilaMesh Mesh;

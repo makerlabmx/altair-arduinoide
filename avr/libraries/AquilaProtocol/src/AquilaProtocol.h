@@ -8,8 +8,6 @@
 #include "lwm/nwk/nwk.h"
 #include "stack/Protocol.h"
 
-#define BROADCAST 0xFFFF
-
 class AquilaProtocol
 {
 private:

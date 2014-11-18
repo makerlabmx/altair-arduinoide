@@ -166,5 +166,9 @@ uint16_t AquilaMesh::getShortAddr()
 	return shortAddr;
 }
 
+/*void AquilaMesh::getEUIAddress(uint8_t* address)
+{
+	
+}*/
 
 AquilaMesh Mesh;
