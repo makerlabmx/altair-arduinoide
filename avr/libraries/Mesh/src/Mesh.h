@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include "lwm/sys/sys.h"
 #include "lwm/nwk/nwk.h"
+#include "stack/halID.h"
 
 #define AQUILAMESH_DEFPAN 0xCA5A
 #define AQUILAMESH_DEFCHAN 0x1A
@@ -29,6 +30,8 @@ public:
 	void setPanId(uint16_t panId);
 	void setChannel(uint8_t channel);
 	void openEndpoint(uint8_t id, bool (*handler)(NWK_DataInd_t *ind));
+
+	uint16_t getShortAddr();
 };
 
 extern AquilaMesh Mesh;

@@ -1,3 +1,4 @@
+#include <Wire.h>
 #include "Mesh.h"
 #include "WSerial.h"
 

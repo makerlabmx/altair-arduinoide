@@ -1,5 +1,6 @@
 #include "AquilaBridge.h"
 #include "RingBuffer.h"
+#include "TxPacketRingBuffer.h"
 #include "lwm/sys/sys.h"
 #include "lwm/nwk/nwk.h"
 #include "lwm/phy/phy.h"
@@ -13,6 +14,7 @@ uint8_t bridgeAddress[8];
 
 uint8_t comTxBuffer[TX_BUFFER_SIZE];
 RingBuffer pktRxBuffer;
+TxRingBuffer txPktBuffer;
 
 // Based on version from: http://www.gaw.ru/pdf/Atmel/app/avr/AVR350.pdf
 uint16_t calcrc(uint8_t *ptr, int count)
@@ -168,15 +170,33 @@ static void txCb(NWK_DataReq_t *req)
 
 void txSend(uint16_t dstAddr, uint8_t srcEndpoint, uint8_t dstEndpoint, uint8_t size, uint8_t *data)
 {
-	if(txDataReqBusy){ sendError(); return; }	// lose packet... check alternative TODO
+	if(TxRingBuffer_isFull(&txPktBuffer)){ sendError(); return; }	// lose packet...
 
-	static NWK_DataReq_t packet;
+	static TxPacket packet;
 	packet.dstAddr = dstAddr;
 	packet.dstEndpoint = dstEndpoint;
 	packet.srcEndpoint = srcEndpoint;
-	packet.options = 0;				// TODO: Check options, check if its ok for broadcast, or we need option...
-	packet.data = data;
+	memcpy(packet.data, data, size);
 	packet.size = size;
+	TxRingBuffer_insert(&txPktBuffer, &packet);
+
+	if(!txDataReqBusy) txSendNow();
+}
+
+void txSendNow()
+{
+	if(txDataReqBusy) return;	// Means we are not ready to send yet.
+
+	static TxPacket bufPacket;
+	TxRingBuffer_remove(&txPktBuffer, &bufPacket);
+
+	static NWK_DataReq_t packet;
+	packet.dstAddr = bufPacket.dstAddr;
+	packet.dstEndpoint = bufPacket.dstEndpoint;
+	packet.srcEndpoint = bufPacket.srcEndpoint;
+	packet.options = 0;				// TODO: Check options, check if its ok for broadcast, or we need option...
+	packet.data = bufPacket.data;
+	packet.size = bufPacket.size;
 	packet.confirm = txCb;
 	NWK_DataReq(&packet);
 
@@ -340,6 +360,7 @@ bool Bridge_init(uint16_t addr, uint8_t channel, uint16_t pan, bool promiscuous)
     if( !ID_getId(bridgeAddress) ) return false;		// Error, couldnt get address from chip
 	//PHY_SetPromiscuous(promiscuous);
     RingBuffer_init(&pktRxBuffer);
+    TxRingBuffer_init(&txPktBuffer);
 
     // Subscribe handler for all endpoints
     for(int i = 0; i < 16; i++)
@@ -364,5 +385,9 @@ void Bridge_loop()
 		RingBufferData data;
 		RingBuffer_remove(&pktRxBuffer, &data);
 		sendBuffer(data.data, data.size);
+	}
+	if(!TxRingBuffer_isEmpty(&txPktBuffer))
+	{
+		txSendNow();
 	}
 }

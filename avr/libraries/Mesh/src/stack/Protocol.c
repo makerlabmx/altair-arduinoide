@@ -14,6 +14,7 @@ static bool Protocol__rxHandler(NWK_DataInd_t *ind)
 	}
 	receivedPacket.data = receivedData;
 	flagGotPacket++;
+	return true;
 }
 
 int Protocol_init(Protocol *self)

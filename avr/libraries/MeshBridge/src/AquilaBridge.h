@@ -50,6 +50,8 @@ void txCb(uint8_t status);
 
 void txSend(uint16_t dstAddr, uint8_t srcEndpoint, uint8_t dstEndpoint, uint8_t size, uint8_t *data);
 
+void txSendNow();
+
 // Called on rx success, gets rx data
 void rxHandler(PHY_DataInd_t *ind);
 
