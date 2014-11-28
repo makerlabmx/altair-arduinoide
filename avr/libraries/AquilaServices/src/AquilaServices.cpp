@@ -7,7 +7,7 @@ static NWK_DataReq_t nwkPacket;
 bool nwkTxBusy = false;
 
 Service services[AQUILASERVICES_MAX];
-void (*lastReqCb)(uint16_t srcAddr, uint8_t status, uint8_t *data, uint8_t dataSize);
+void (*lastReqCb)(uint16_t srcAddr, uint8_t status, char *data, uint8_t dataSize);
 bool waitingResponse;
 double lastRequestTime;
 
@@ -31,6 +31,7 @@ static bool rxHandler(NWK_DataInd_t *ind)
 	// packet data must be at least 4 bytes for version, method, nameSize and dataSize
 	if(ind->size < 4) return false;
 	ServicePacket pkt;
+
 	memcpy(&pkt, ind->data, ind->size);
 
 	// Check version
@@ -38,18 +39,16 @@ static bool rxHandler(NWK_DataInd_t *ind)
 
 	// Parsing name
 	char name[AQUILASERVICES_MAXNAMESIZE];
-	uint8_t data[AQUILASERVICES_MAXDATASIZE];
+	char data[AQUILASERVICES_MAXDATASIZE];
 
 	memcpy(name, pkt.name_data, pkt.nameSize);
 	name[pkt.nameSize] = NULL;	// End byte
 
-	// debug
-	Serial.println(name);
-
 	memcpy(data, &pkt.name_data[pkt.nameSize], pkt.dataSize);
+	data[pkt.dataSize] = NULL;	// End byte for string security
 
 	// Handle responses:
-	if(pkt.method == R200 || pkt.method == R404 || pkt.method == R500)
+	if(pkt.method == R200 || pkt.method == R404 || pkt.method == R500 || pkt.method == R405 || pkt.method == R408)
 	{
 		if(lastReqCb != NULL) lastReqCb(ind->srcAddr, pkt.method, data, pkt.dataSize);
 		// NULL out lastReqCb so it only works once:
@@ -63,7 +62,6 @@ static bool rxHandler(NWK_DataInd_t *ind)
 	{
 		if(services[i].name == NULL) continue;
 
-		Serial.println(services[i].name);
 		if( 0 == strcmp(services[i].name, name) )
 		{
 			if( NULL != services[i].function ) return services[i].function(ind->srcAddr, pkt.method, data, pkt.dataSize);
@@ -107,7 +105,7 @@ void AquilaServices::loop()
 	}
 }
 // Inscribe un servicio a name
-void AquilaServices::add(char *name, bool (*function)(uint16_t reqAddr, uint8_t method, uint8_t *data, uint8_t dataSize))
+void AquilaServices::add(char *name, bool (*function)(uint16_t reqAddr, uint8_t method, char *data, uint8_t dataSize))
 {
 	for(uint8_t i = 0; i < AQUILASERVICES_MAX; i++)
 	{
@@ -120,7 +118,7 @@ void AquilaServices::add(char *name, bool (*function)(uint16_t reqAddr, uint8_t 
 	}
 }
 // Petición
-void AquilaServices::request(uint16_t destAddr, uint8_t method, char *name, void (*callback)(uint16_t srcAddr, uint8_t status, uint8_t *data, uint8_t dataSize), uint8_t *data, uint8_t dataSize)
+void AquilaServices::request(uint16_t destAddr, uint8_t method, char *name, void (*callback)(uint16_t srcAddr, uint8_t status, char *data, uint8_t dataSize), char *data, uint8_t dataSize)
 {
 	// lose packet
 	if(nwkTxBusy || waitingResponse) return;
@@ -139,7 +137,7 @@ void AquilaServices::request(uint16_t destAddr, uint8_t method, char *name, void
 	nwkPacket.srcEndpoint = AQUILASERVICES_ENDPOINT;
 	nwkPacket.options = 0;
 	nwkPacket.data = (uint8_t*)&pkt;
-	nwkPacket.size = dataSize + 4;
+	nwkPacket.size = pkt.nameSize + pkt.dataSize + 4;
 	nwkPacket.confirm = nwkTxCb;
 	NWK_DataReq(&nwkPacket);
 
@@ -152,7 +150,7 @@ void AquilaServices::request(uint16_t destAddr, uint8_t method, char *name, void
 	lastRequestTime = millis();
 }
 // Para usar dentro del servicio
-void AquilaServices::response(uint16_t destAddr, uint8_t method, uint8_t *data, uint8_t dataSize)
+void AquilaServices::response(uint16_t destAddr, uint8_t method, char *data, uint8_t dataSize)
 {
 	// lose packet
 	if(nwkTxBusy) return;

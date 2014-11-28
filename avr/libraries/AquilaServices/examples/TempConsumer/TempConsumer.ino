@@ -2,19 +2,63 @@
 #include <Mesh.h>
 #include <AquilaServices.h>
 #include <SimpleTimer.h>
+#include <JsonParser.h>
 
+using namespace ArduinoJson::Parser;
+
+/*
+	Aquila Services Example:
+
+	This example consist in two files: TempConsumer and TempService.
+
+	You should upload each one to a different Altair, then you can monitor
+	their status from the serial console.
+
+	The Altair with TempService will define a service called "temperature", that will respond 
+	with the current temperature of the device.
+
+	The Altair with TempConsumer will be making requests to the other one each second and 
+	display the response in the serial console.
+
+	We are using the Arduino Json library for encoding and decoding the data.
+	You can get its documentation here: https://github.com/bblanchon/ArduinoJson
+*/
+
+// Addresses, ADDR is local address, DEST is destination
 #define ADDR 8
 #define DEST 7
 
+// We are using the SimpleTimer library for making request every second.
 SimpleTimer timer;
 
-void tempReqCb(uint16_t srcAddr, uint8_t status, uint8_t *data, uint8_t dataSize)
+// This function will be called when we receive the response of a request
+void tempReqCb(uint16_t srcAddr, uint8_t status, char *data, uint8_t dataSize)
 {
+	/*
+		Possible response status are:
+		R200 0x04	// OK
+		R404 0x05	// Service not found
+		R405 0x06	// Method not allowed
+		R408 0x07	// Timeout
+		R500 0x08	// Service error
+	*/
 	if(status != R200) { Serial.print("Request Error Status: "); Serial.println(status, HEX); return;}
-	if(dataSize > 0) Serial.println(*data);
+	if(dataSize > 0) 
+	{ 
+		Serial.print("Response: "); Serial.println(data); 
+
+		// Allocating enough memory for the parser
+		JsonParser<32> parser;
+		JsonObject json = parser.parse(data);
+		if(!json.success()) { Serial.println("Error parsing JSON"); return; }
+
+		Serial.print("Temperature: ");
+		Serial.println((double)json["temp"]);
+	}
 	else Serial.println("Got null data...");
 }
 
+// This function makes the request
 void getTemp()
 {
 	Serial.println("Making Request...");
@@ -27,6 +71,7 @@ void setup()
 	Mesh.begin(ADDR);
 	Services.begin();
 
+	// Execute getTemp() every 1000 ms
 	timer.setInterval(1000, getTemp);
 
 	Serial.println("Temp Consumer starting...");
