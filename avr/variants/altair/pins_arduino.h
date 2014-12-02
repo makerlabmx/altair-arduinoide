@@ -65,13 +65,13 @@
 
 // Pins PCINT7:0 are mapped to PCIE0 interrupt on bit 0 of PCICR, only PCINT8 is mapped to PCIE1.
 #define digitalPinToPCICRbit(p) (((p) >=  8 && (p) <= 12) || \
-                                 ((p) >= 28 && (p) <= 30) ? 0 : 1))
+                                 ((p) >= 28 && (p) <= 30) ? 0 : 1)
 
 #define digitalPinToPCMSK(p)    (((p) >=  8 && (p) <= 12) || \
                                  ((p) >= 28 && (p) <= 30) ? (&PCMSK0) : (&PCMSK1) )
 
 #define digitalPinToPCMSKbit(p) (((p) == 8 ) ? 0 : \
-                                 (((p) >= 9 && (p) <= 12) ? ((p) - 5) : (0))
+                                 (((p) >= 9 && (p) <= 12) ? ((p) - 5) : (0)))
 
 #ifdef ARDUINO_MAIN
 
