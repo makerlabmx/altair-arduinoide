@@ -11,6 +11,7 @@ static NWK_DataReq_t packet;
 uint8_t packetData[WSERIAL_BUFFER_SIZE];
 
 uint16_t destAddress;
+bool allowFromAny = false;
 volatile uint8_t _rx_buffer_head;
 volatile uint8_t _rx_buffer_tail;
 volatile uint8_t _tx_buffer_head;
@@ -23,10 +24,11 @@ uint8_t _tx_buffer[WSERIAL_BUFFER_SIZE];
 
 static bool receiveMessage(NWK_DataInd_t *ind)
 {
-	// Check if its from the address we are expecting, 
+	// Check if its from the address we are expecting,
 	// ignore otherwise
 	// If destAddress == BROADCAST, Accept all
-	if(destAddress != BROADCAST && ind->srcAddr != destAddress) return false;
+	// If allowFromAny == true, accept all
+	if( !(destAddress == BROADCAST || allowFromAny == true) && ind->srcAddr != destAddress) return false;
 	// Put received data into rx buffer
 	// if not enough space, drop data :(
 	if(ind->size > (WSERIAL_BUFFER_SIZE - (unsigned int)(WSERIAL_BUFFER_SIZE + _rx_buffer_head - _rx_buffer_tail) % WSERIAL_BUFFER_SIZE) ) return false;
@@ -49,11 +51,22 @@ void WirelessSerial::begin(uint16_t destAddr)
 {
 	_rx_buffer_head = _rx_buffer_tail = 0;
 	_tx_buffer_head = _tx_buffer_tail = 0;
-	destAddress = destAddr;
+	setDest(destAddr);
 	// SYS_Init(); Should init in Mesh.begin()
 	PHY_SetRxState(true);
 	NWK_OpenEndpoint(WSERIAL_ENDPOINT, receiveMessage);
 }
+
+void WirelessSerial::setDest(uint16_t destAddr)
+{
+	destAddress = destAddr;
+}
+
+void WirelessSerial::setAllowFromAny(bool allow)
+{
+	allowFromAny = allow;
+}
+
 
 void WirelessSerial::end()
 {
@@ -129,7 +142,10 @@ void WirelessSerial::sendPacketNow()
 	packet.dstAddr = destAddress;
 	packet.dstEndpoint = WSERIAL_ENDPOINT;
 	packet.srcEndpoint = WSERIAL_ENDPOINT;
-	packet.options = 0;
+	if(Mesh.getSecurityEnabled())
+		packet.options = NWK_OPT_ENABLE_SECURITY;
+	else
+		packet.options = 0;
 	packet.data = packetData;
 	packet.size = size;
 	packet.confirm = appDataCb;

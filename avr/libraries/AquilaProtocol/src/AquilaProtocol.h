@@ -44,8 +44,6 @@ public:
 	void requestAction(uint16_t address, uint8_t action, uint8_t param=0, bool hasParam=false);
 
 	bool doAction(uint8_t action, uint8_t param, bool gotParam);
-
-	void getEUIAddress(uint8_t* address);
 };
 
 extern AquilaProtocol Aquila;

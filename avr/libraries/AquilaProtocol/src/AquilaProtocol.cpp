@@ -6,7 +6,7 @@
 
 int AquilaProtocol::begin()
 {
-	return Protocol_init(&protocol);
+	return Protocol_init(&protocol, Mesh.getSecurityEnabled());
 }
 
 /*
@@ -69,11 +69,6 @@ void AquilaProtocol::requestAction(uint16_t address, uint8_t action, uint8_t par
 bool AquilaProtocol::doAction(uint8_t action, uint8_t param, bool gotParam)
 {
 	return Protocol_doAction(&protocol, action, param, gotParam);
-}
-
-void AquilaProtocol::getEUIAddress(uint8_t* address)
-{
-	memcpy(address, protocol.EUIAddress, PROTOCOL_EUIADDRESSLEN);
 }
 
 AquilaProtocol Aquila;

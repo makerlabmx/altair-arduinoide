@@ -13,10 +13,12 @@
 class WirelessSerial : public Stream
 {
 	private:
-		unsigned long lastTimeSent;	
+		unsigned long lastTimeSent;
 
 	public:
 		void begin(uint16_t destAddr);
+		void setDest(uint16_t destAddr);
+		void setAllowFromAny(bool allow);
 		void end();
 		virtual int available(void);
 		virtual int peek(void);

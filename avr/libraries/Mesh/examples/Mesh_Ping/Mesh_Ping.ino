@@ -29,7 +29,7 @@ SimpleTimer timer;
 
 byte pingCounter = 0;
 
-static bool receiveMessage(NWK_DataInd_t *ind) 
+static bool receiveMessage(RxPacket *ind)
 {
 	// Toggle LED
 	ledState = !ledState;
@@ -49,7 +49,7 @@ static bool receiveMessage(NWK_DataInd_t *ind)
 	return true;
 }
 
-static void pingConfirm(NWK_DataReq_t *req)
+static void pingConfirm(TxPacket *req)
 {
 	// Here, you could check req->status
 	// For knowing if the packet was succesfully sent.
@@ -62,15 +62,18 @@ static void sendMessage(void)
 	Serial.println(DESTINATION_ADDRESS);
 
 	// forming packet
-	static NWK_DataReq_t packet;
+	static TxPacket packet;
 	packet.dstAddr = DESTINATION_ADDRESS;
 	packet.dstEndpoint = 1;
 	packet.srcEndpoint = 1;
-	packet.options = 0;
+	if(Mesh.getSecurityEnabled())
+		packet.options = NWK_OPT_ENABLE_SECURITY;
+	else
+		packet.options = 0;
 	packet.data = &pingCounter;
 	packet.size = sizeof(pingCounter);
 	packet.confirm = pingConfirm;
-	NWK_DataReq(&packet);
+	Mesh.sendPacket(&packet);
 }
 
 void setup()
@@ -84,6 +87,9 @@ void setup()
 	Mesh.setAddr(LOCAL_ADDRESS);
 	Mesh.setPanId(0xCA5A);
 	Mesh.setChannel(0x1A);
+	uint8_t key[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
+	Mesh.setSecurityKey(key);
+	Mesh.setSecurityEnabled(true);
 
 	// Get and print local address:
 	Serial.print("Local Address: ");
@@ -95,6 +101,8 @@ void setup()
 
 	// Ping every second
 	timer.setInterval(1000, sendMessage);
+
+	Mesh.announce(BROADCAST);
 }
 
 void loop()

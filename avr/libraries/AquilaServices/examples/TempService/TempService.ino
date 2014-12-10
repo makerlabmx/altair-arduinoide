@@ -14,10 +14,10 @@ using namespace ArduinoJson::Generator;
 	You should upload each one to a different Altair, then you can monitor
 	their status from the serial console.
 
-	The Altair with TempService will define a service called "temperature", that will respond 
+	The Altair with TempService will define a service called "temperature", that will respond
 	with the current temperature of the device.
 
-	The Altair with TempConsumer will be making requests to the other one each second and 
+	The Altair with TempConsumer will be making requests to the other one each second and
 	display the response in the serial console.
 
 	We are using the Arduino Json library for encoding and decoding the data.
@@ -46,7 +46,7 @@ bool tempService(uint16_t reqAddr, uint8_t method, char *data, uint8_t dataSize)
 		json["temp"] = temp;
 
 		// We need to print the json to a buffer before sending
-		// Make shure you have enough buffer space, in this case 
+		// Make shure you have enough buffer space, in this case
 		// the result will be: {"temp":xx.xx}, so we only really need about 14 bytes
 		char buffer[16];
 		json.printTo(buffer, sizeof(buffer));
@@ -57,7 +57,7 @@ bool tempService(uint16_t reqAddr, uint8_t method, char *data, uint8_t dataSize)
 		Serial.println("Unsupported method requested for this service");
 		Services.response(reqAddr, R405);
 	}
-	
+
 }
 
 void setup()

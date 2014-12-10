@@ -6,7 +6,7 @@
 
 	service: Function
 	data: JSON proposed
-	
+
 	Packet:
 		methods (2 bits):
 			GET		0x00
@@ -67,7 +67,7 @@ typedef struct
 class AquilaServices
 {
 private:
-	
+
 public:
 	AquilaServices();
 	void begin();

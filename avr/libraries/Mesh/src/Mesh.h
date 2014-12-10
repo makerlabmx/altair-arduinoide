@@ -6,7 +6,6 @@
 #include <stdbool.h>
 #include "lwm/sys/sys.h"
 #include "lwm/nwk/nwk.h"
-#include "stack/halID.h"
 
 #define BROADCAST 0xFFFF
 
@@ -15,12 +14,17 @@
 
 // According to Atmel-42028-Lightweight-Mesh-Developer-Guide_Application-Note_AVR2130,
 // Max payload size is 105 with security and 32bit MIC and 109 without security
-#define AQUILAMESH_MAXPAYLOAD 105
+#define AQUILAMESH_MAXPAYLOAD (NWK_MAX_PAYLOAD_SIZE - 4)/*Security 32bit MIC*/
+
+// Frendlier names for LWM types
+#define TxPacket NWK_DataReq_t
+#define RxPacket NWK_DataInd_t
 
 class AquilaMesh
 {
 private:
 public:
+	AquilaMesh();
 	void begin();
 	void begin(uint16_t addr);
 
@@ -31,10 +35,17 @@ public:
 	void setAddr(uint16_t addr);
 	void setPanId(uint16_t panId);
 	void setChannel(uint8_t channel);
-	void openEndpoint(uint8_t id, bool (*handler)(NWK_DataInd_t *ind));
+	void setSecurityKey(uint8_t *key);
+	void setSecurityEnabled(bool enabled);
+	bool getSecurityEnabled();
+	void openEndpoint(uint8_t id, bool (*handler)(RxPacket *ind));
+
+	void sendPacket(TxPacket *packet);
+
+	void announce(uint16_t dest);
 
 	uint16_t getShortAddr();
-	// void getEUIAddr(uint8_t* address);	TODO: Implement, change from AquilaProtocol to here.
+	void getEUIAddr(uint8_t* address);
 
 };
 

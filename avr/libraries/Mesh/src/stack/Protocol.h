@@ -80,10 +80,11 @@ typedef struct
 	uint8_t nEvents;
  	Action *actions[PROTOCOL_MAXACTIONS];
  	char *events[PROTOCOL_MAXEVENTS];
+	bool secEnabled;
 
 } Protocol;
 
-int Protocol_init(Protocol *self);
+int Protocol_init(Protocol *self, bool secEnabled);
 
 void Protocol_setId(Protocol *self, char *nid);
 

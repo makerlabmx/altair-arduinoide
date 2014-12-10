@@ -4,6 +4,8 @@
 #include "Arduino.h"
 #include "lwm/sys/sys.h"
 #include "lwm/nwk/nwk.h"
+#include "lwm/nwk/nwkSecurity.h"
+#include "stack/halID.h"
 #include "Mesh.h"
 
 //#define MESH_DEBUG
@@ -14,6 +16,7 @@
 
 #define MESH_ADDRENDPOINT 15
 
+/* --------------------------- Address collision ------------------------*/
 // Based on version from: http://www.gaw.ru/pdf/Atmel/app/avr/AVR350.pdf
 uint16_t calcrc(uint8_t *ptr, int count)
 {
@@ -40,13 +43,7 @@ static uint16_t genAddr = 0;
 static bool waitingAddrConfirm = false;
 static bool addrAssignSuccess = false;
 
-static bool addrCb(NWK_DataInd_t *ind)
-{
-	// send ack
-	return true;
-}
-
-static void pingCb(NWK_DataReq_t *req)
+static void pingCb(TxPacket *req)
 {
 	#ifdef MESH_DEBUG
 	printf("pingCb, status: %x\n", req->status);
@@ -71,15 +68,81 @@ static void pingCb(NWK_DataReq_t *req)
 	(void)req;
 }
 
+/* --------------------------- /Address collision ------------------------*/
+
+#define MESH_CMD_GETEUI 0
+#define MESH_CMD_RESEUI 1
+
+static bool secEnabled;
+static bool euiBussy = false;
+static uint8_t euiAddr[8];
+static TxPacket packet;
+
+static void euiCb(TxPacket *req)
+{
+	euiBussy = false;
+}
+
+void sendEUI(uint16_t dest)
+{
+	if(euiBussy) return;
+
+	static uint8_t data[9];
+	data[0] = MESH_CMD_RESEUI;
+
+	// copy eui
+	memcpy(&data[1], euiAddr, 8);
+
+	packet.dstAddr = dest;
+	packet.dstEndpoint = MESH_ADDRENDPOINT;
+	packet.srcEndpoint = MESH_ADDRENDPOINT;
+	if(secEnabled)
+		packet.options = NWK_OPT_ENABLE_SECURITY;
+	else
+		packet.options = 0;
+	packet.data = data;
+	packet.size = 9;
+	packet.confirm = euiCb;
+
+	euiBussy = true;
+	NWK_DataReq(&packet);
+}
+
+static bool meshCb(RxPacket *ind)
+{
+	// check if address collision packet
+	if(ind->size == 0)	// address collision packet
+	{
+		// send ack
+		return true;
+	}
+	else	// size at least 1
+	{
+		if(ind->data[0] == MESH_CMD_GETEUI)
+		{
+			sendEUI(ind->srcAddr);
+		}
+	}
+	return true;
+}
+
+AquilaMesh::AquilaMesh()
+{
+	secEnabled = false;
+}
+
 // Begin with automatic address
 void AquilaMesh::begin()
 {
 	#ifdef MESH_DEBUG
 	Serial_init();
 	#endif
+	// Init as address 0:
+	begin(0);
+
 	uint8_t id[8];
-	ID_init();
-	ID_getId(id);
+	// TODO: Should check for error on EUI read and do something different.
+	getEUIAddr(id);
 
 	genAddr = calcrc(id, 8);
 	// Check if we are not in manual address range, and fix.
@@ -88,13 +151,9 @@ void AquilaMesh::begin()
 	//test collision:
 	//genAddr = 3;
 
-	// Init as address 0:
-	begin(0);
-
 	while(!addrAssignSuccess)
 	{
 		// Send a ping packet to our generated address to check if its already taken
-		static NWK_DataReq_t packet;
 		packet.dstAddr = genAddr;
 		packet.dstEndpoint = MESH_ADDRENDPOINT;
 		packet.srcEndpoint = MESH_ADDRENDPOINT;
@@ -119,6 +178,7 @@ void AquilaMesh::begin()
 // Begin with manual address addr
 void AquilaMesh::begin(uint16_t addr)
 {
+
 	SYS_Init();
 	PHY_SetRxState(true);
 	shortAddr = addr;
@@ -126,7 +186,10 @@ void AquilaMesh::begin(uint16_t addr)
 	NWK_SetPanId(AQUILAMESH_DEFPAN);
 	PHY_SetChannel(AQUILAMESH_DEFCHAN);
 
-	NWK_OpenEndpoint(MESH_ADDRENDPOINT, addrCb);
+	ID_init();
+	if( !ID_getId(euiAddr) );        //Error
+
+	NWK_OpenEndpoint(MESH_ADDRENDPOINT, meshCb);
 }
 
 void AquilaMesh::end()
@@ -154,11 +217,35 @@ void AquilaMesh::setChannel(uint8_t channel)
 	PHY_SetChannel(channel);
 }
 
-// Leave this as advanced and require direct NWK_... calling??
-// otherwhise we should redefine the Reqs etc... 
-void AquilaMesh::openEndpoint(uint8_t id, bool (*handler)(NWK_DataInd_t *ind))
+void AquilaMesh::setSecurityKey(uint8_t *key)
+{
+	NWK_SetSecurityKey(key);
+}
+
+void AquilaMesh::setSecurityEnabled(bool enabled)
+{
+	secEnabled = enabled;
+}
+
+bool AquilaMesh::getSecurityEnabled()
+{
+	return secEnabled;
+}
+
+void AquilaMesh::openEndpoint(uint8_t id, bool (*handler)(RxPacket *ind))
 {
 	NWK_OpenEndpoint(id, handler);
+}
+
+void AquilaMesh::sendPacket(TxPacket *packet)
+{
+	NWK_DataReq(packet);
+}
+
+// Announce device to the network
+void AquilaMesh::announce(uint16_t dest)
+{
+	sendEUI(dest);
 }
 
 uint16_t AquilaMesh::getShortAddr()
@@ -166,9 +253,9 @@ uint16_t AquilaMesh::getShortAddr()
 	return shortAddr;
 }
 
-/*void AquilaMesh::getEUIAddress(uint8_t* address)
+void AquilaMesh::getEUIAddr(uint8_t* address)
 {
-	
-}*/
+	memcpy(address, euiAddr, 8);
+}
 
 AquilaMesh Mesh;

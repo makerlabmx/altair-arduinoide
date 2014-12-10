@@ -17,9 +17,10 @@ static bool Protocol__rxHandler(NWK_DataInd_t *ind)
 	return true;
 }
 
-int Protocol_init(Protocol *self)
+int Protocol_init(Protocol *self, bool secEnabled)
 {
 	flagGotPacket = 0;
+	self->secEnabled = secEnabled;
 
 	// Get EUI Long Address from id chip
 	ID_init();
@@ -30,7 +31,7 @@ int Protocol_init(Protocol *self)
 	self->name = PROTOCOL_DEFAULT_NAME;
 	self->nActions = 0;
 	self->nEvents = 0;
-	
+
 	// zeroing actions
 	int i;
 	for(i = 0; i < PROTOCOL_MAXACTIONS; i++)
@@ -64,7 +65,7 @@ void Protocol__parsePacket(Protocol *self)
 	char *data = (char*)receivedPacket.data;
 
 	if(dataLen < 2) { Protocol_sendNack(self, sAddr); return; }
-	
+
 	uint8_t pktVersion = data[0];
 
 	if(pktVersion != PROTOCOL_VERSION) { Protocol_sendNack(self, sAddr); return; }	//if protocol version is diferent, nack and do nothing.
@@ -222,7 +223,10 @@ void Protocol_send(Protocol *self, uint16_t address, char *command, uint8_t size
 	packet.dstAddr = address;
 	packet.dstEndpoint = PROTOCOL_ENDPOINT;
 	packet.srcEndpoint = PROTOCOL_ENDPOINT;
-	packet.options = 0;				// TODO: Check options, check if its ok for broadcast, or we need option...
+	if(self->secEnabled)
+		packet.options = NWK_OPT_ENABLE_SECURITY;
+	else
+		packet.options = 0;
 	packet.data = data;
 	packet.size = (size + 1);
 	packet.confirm = Protocol__DataCb;
@@ -268,10 +272,10 @@ void Protocol_requestAction(Protocol *self, uint16_t address, uint8_t action, ui
 		packet[1] = action;
 		//param byte:
 		if(hasParam) packet[2] = param;
-    
+
 	    Protocol_send(self, address, packet, 2 + hasParam);
 	}
-    
+
 }
 
 bool Protocol_doAction(Protocol *self, uint8_t action, uint8_t param, bool gotParam)
@@ -419,7 +423,7 @@ void Protocol_sendNEntries(Protocol *self, uint16_t address)
 void Protocol_sendEntry(Protocol *self, uint8_t nEntry, uint16_t address)
 {
 	Entry entry;
-	if(!PDB_getEntry(&entry, nEntry)) 
+	if(!PDB_getEntry(&entry, nEntry))
 	{
 		Protocol_sendNack(self, address);
 		return;
@@ -433,7 +437,7 @@ void Protocol_sendEntry(Protocol *self, uint8_t nEntry, uint16_t address)
 	packet[2] = nEntry;
 	//data bytes:
 	memcpy(&packet[3], &entry, PROTOCOL_ENTRYLEN);
-    
+
     if(address != BROADCAST) Protocol_send(self, address, packet, 3 + PROTOCOL_ENTRYLEN);
 }
 
@@ -484,7 +488,7 @@ void Protocol_addAction(Protocol *self, char description[], bool (*function)(uin
 
 void Protocol_setEvent(Protocol *self, uint8_t n, char description[])
 {
-	if(n < PROTOCOL_MAXEVENTS) 
+	if(n < PROTOCOL_MAXEVENTS)
 	{
 		if(self->events[n] == NULL) self->nEvents++;
 		uint8_t size = strlen(description);
