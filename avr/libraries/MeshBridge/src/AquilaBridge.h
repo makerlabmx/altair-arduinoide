@@ -25,6 +25,9 @@ extern "C" {
 #define CMD_SUCCESS 8
 #define CMD_ERROR 9
 #define CMD_GET_LONG_ADDR 10
+#define CMD_GET_SECURITY 11
+#define CMD_SET_SECURITY 12
+#define CMD_SET_KEY 13
 
 bool getChTimeOut(uint8_t *c, long timeOut);
 

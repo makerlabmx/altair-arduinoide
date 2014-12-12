@@ -138,6 +138,13 @@ void sendLongAddr(uint8_t addr[])
 	sendBuffer(comTxBuffer, 9);
 }
 
+void sendSecurityEnabled()
+{
+	comTxBuffer[0] = CMD_GET_SECURITY;
+	comTxBuffer[1] = Mesh.getSecurityEnabled();
+	sendBuffer(comTxBuffer, 2);
+}
+
 static void txCb(NWK_DataReq_t *req)
 {
     txDataReqBusy = false;
@@ -145,15 +152,15 @@ static void txCb(NWK_DataReq_t *req)
     /*
     	Possible status:
 
-    	NWK_SUCCESS_STATUS                    
-		NWK_ERROR_STATUS                     
-		NWK_OUT_OF_MEMORY_STATUS             
+    	NWK_SUCCESS_STATUS
+		NWK_ERROR_STATUS
+		NWK_OUT_OF_MEMORY_STATUS
 
-		NWK_NO_ACK_STATUS                    
-		NWK_NO_ROUTE_STATUS                  
+		NWK_NO_ACK_STATUS
+		NWK_NO_ROUTE_STATUS
 
 		NWK_PHY_CHANNEL_ACCESS_FAILURE_STATUS
-		NWK_PHY_NO_ACK_STATUS       
+		NWK_PHY_NO_ACK_STATUS
     */
 
     if(req->status == NWK_SUCCESS_STATUS)
@@ -172,7 +179,7 @@ void txSend(uint16_t dstAddr, uint8_t srcEndpoint, uint8_t dstEndpoint, uint8_t 
 {
 	if(TxRingBuffer_isFull(&txPktBuffer)){ sendError(); return; }	// lose packet...
 
-	static TxPacket packet;
+	static TxBufPacket packet;
 	packet.dstAddr = dstAddr;
 	packet.dstEndpoint = dstEndpoint;
 	packet.srcEndpoint = srcEndpoint;
@@ -187,7 +194,7 @@ void txSendNow()
 {
 	if(txDataReqBusy) return;	// Means we are not ready to send yet.
 
-	static TxPacket bufPacket;
+	static TxBufPacket bufPacket;
 	TxRingBuffer_remove(&txPktBuffer, &bufPacket);
 
 	static NWK_DataReq_t packet;
@@ -236,7 +243,7 @@ static bool rxHandler(NWK_DataInd_t *ind)
 
 bool serialHandler()
 {
-	uint8_t temp, command, size, data[MAX_FRAME_SIZE], longAddr[8], srcEndpoint, dstEndpoint;
+	uint8_t temp, command, size, data[MAX_FRAME_SIZE], longAddr[8], srcEndpoint, dstEndpoint, secKey[16];
 	uint16_t pan, shortAddr, recCrc, calcCrc, dstAddr;
 	int i;
 	//Getting header
@@ -287,7 +294,7 @@ bool serialHandler()
 			if(!getChTimeOut(&temp, TIMEOUT)) return false;
 			recCrc |= temp & 0x00FF;*/													// TERMINAR DE IMPLEMENTAR
 
-    		txSend(dstAddr, srcEndpoint, dstEndpoint, size, data);
+    	txSend(dstAddr, srcEndpoint, dstEndpoint, size, data);
 
 			break;
 
@@ -341,6 +348,28 @@ bool serialHandler()
 			sendLongAddr(bridgeAddress);
 			break;
 
+		case CMD_GET_SECURITY:
+			sendSecurityEnabled();
+			break;
+
+		case CMD_SET_SECURITY:
+			// get if enable security
+			if(!getChTimeOut(&temp, TIMEOUT)) return false;
+			Mesh.setSecurityEnabled((bool)temp);
+			sendSecurityEnabled();
+			break;
+
+		case CMD_SET_KEY:
+			for(i = 0; i < 16; i++)
+			{
+				if(!getChTimeOut(&temp, TIMEOUT)) return false;
+				secKey[i] = temp;
+			}
+			Mesh.setSecurityKey(secKey);
+			Mesh.setSecurityEnabled(true);
+			sendSecurityEnabled();
+			break;
+
 		default:
 			return false;
 			break;
@@ -353,8 +382,8 @@ bool Bridge_init(uint16_t addr, uint8_t channel, uint16_t pan, bool promiscuous)
 {
 	ID_init();
 	if(addr == NULL) Mesh.begin();
-	else Mesh.begin(addr);	
-    
+	else Mesh.begin(addr);
+
     Mesh.setChannel(channel);
     Mesh.setPanId(pan);
     if( !ID_getId(bridgeAddress) ) return false;		// Error, couldnt get address from chip

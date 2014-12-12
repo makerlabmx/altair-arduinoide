@@ -30,10 +30,10 @@ bool TxRingBuffer_isEmpty(TxRingBuffer* buffer)
 	return count == 0;
 }
 
-void TxRingBuffer_insert(TxRingBuffer* buffer, TxPacket* data)
+void TxRingBuffer_insert(TxRingBuffer* buffer, TxBufPacket* data)
 {
 
-	memcpy(buffer->head, data, sizeof(TxPacket));
+	memcpy(buffer->head, data, sizeof(TxBufPacket));
 
 	if (++buffer->head == &buffer->buffer[TXPACKETRINGBUFFER_SIZE])
 	{
@@ -46,15 +46,15 @@ void TxRingBuffer_insert(TxRingBuffer* buffer, TxPacket* data)
 	}
 }
 
-void TxRingBuffer_remove(TxRingBuffer* buffer, TxPacket* data)
+void TxRingBuffer_remove(TxRingBuffer* buffer, TxBufPacket* data)
 {
-	memcpy(data, buffer->tail, sizeof(TxPacket));
-			
+	memcpy(data, buffer->tail, sizeof(TxBufPacket));
+
 	if (++buffer->tail == &buffer->buffer[TXPACKETRINGBUFFER_SIZE])
 	{
 		buffer->tail = buffer->buffer;
 	}
-	
+
 
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
 	{

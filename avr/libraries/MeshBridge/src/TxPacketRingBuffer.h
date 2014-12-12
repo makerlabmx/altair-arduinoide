@@ -18,13 +18,13 @@ typedef struct
 	uint8_t srcEndpoint;
 	uint8_t data[AQUILAMESH_MAXPAYLOAD];
 	uint8_t size;
-} TxPacket;
+} TxBufPacket;
 
 typedef struct
 {
-	TxPacket buffer[TXPACKETRINGBUFFER_SIZE];
-	TxPacket *head;
-	TxPacket *tail;
+	TxBufPacket buffer[TXPACKETRINGBUFFER_SIZE];
+	TxBufPacket *head;
+	TxBufPacket *tail;
 	uint8_t count;
 } TxRingBuffer;
 
@@ -34,8 +34,8 @@ bool TxRingBuffer_isFull(TxRingBuffer* buffer);
 
 bool TxRingBuffer_isEmpty(TxRingBuffer* buffer);
 
-void TxRingBuffer_insert(TxRingBuffer* buffer, TxPacket* data);
+void TxRingBuffer_insert(TxRingBuffer* buffer, TxBufPacket* data);
 
-void TxRingBuffer_remove(TxRingBuffer* buffer, TxPacket* data);
+void TxRingBuffer_remove(TxRingBuffer* buffer, TxBufPacket* data);
 
 #endif // TXPACKETRINGBUFFER_H
