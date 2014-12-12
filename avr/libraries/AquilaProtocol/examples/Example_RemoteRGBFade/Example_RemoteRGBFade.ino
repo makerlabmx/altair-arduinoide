@@ -19,7 +19,7 @@ bool setR(uint8_t param, bool gotParam)
 {
   if(gotParam)
   {
-     // the LED is active low, so we invert the param. 
+     // the LED is active low, so we invert the param.
      analogWrite(LEDR, 255 - param);
   }
 }
@@ -50,17 +50,17 @@ void setup()
   digitalWrite(LEDR, HIGH);
   digitalWrite(LEDG, HIGH);
   digitalWrite(LEDB, HIGH);
-  
+
   Mesh.begin();
   Aquila.begin();
   Aquila.setClass("mx.makerlab.rgb");
   Aquila.setName("RGB");
-  
+
   Aquila.addAction("Red", setR);
   Aquila.addAction("Green", setG);
   Aquila.addAction("Blue", setB);
-  
-  Aquila.announce(HUB);
+
+  Mesh.announce(HUB);
 }
 
 void loop()
@@ -68,5 +68,3 @@ void loop()
   Mesh.loop();
   Aquila.loop();
 }
-
-

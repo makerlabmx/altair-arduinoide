@@ -23,14 +23,14 @@ void setup()
   Aquila.begin();
   Aquila.setClass("mx.makerlab.test");
   Aquila.setName("Test");
-  
+
   Aquila.addAction("Off", turnOff);
   Aquila.addAction("On", turnOn);
-  
+
   off = Aquila.addEvent("Turned Off");
   on = Aquila.addEvent("Turned On");
-  
-  Aquila.announce(BROADCAST);
+
+  Mesh.announce(HUB);
 }
 
 void loop()
@@ -38,5 +38,3 @@ void loop()
   Mesh.loop();
   Aquila.loop();
 }
-
-

@@ -16,7 +16,7 @@ void setup()
   pinMode(PIR, INPUT);
   pinMode(LED, OUTPUT);
   digitalWrite(LED, HIGH);
-  
+
   Mesh.begin();
   Aquila.begin();
   Aquila.setClass("mx.makerlab.movement");
@@ -25,14 +25,14 @@ void setup()
   movement = Aquila.addEvent("Movement detected");
   noMovement = Aquila.addEvent("No movement detected");
 
-  Aquila.announce(BROADCAST);
+  Mesh.announce(HUB);
 }
 
 void loop()
 {
   Mesh.loop();
   Aquila.loop();
-  
+
   statePIRnow = digitalRead(PIR);
   if(statePIRnow == HIGH && statePIRbefore == LOW)
   {

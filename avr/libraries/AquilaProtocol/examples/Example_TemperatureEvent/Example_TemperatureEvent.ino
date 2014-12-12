@@ -53,7 +53,7 @@ void setup()
   timerId = timer.setInterval(1000, measureAndEvent);
   timer.disable(timerId);
   // Announcing device
-  Aquila.announce(BROADCAST);
+  Mesh.announce(HUB);
 }
 
 void loop()
@@ -64,5 +64,3 @@ void loop()
   // Checking if we should measure temperature or wait
   timer.run();
 }
-
-

@@ -15,7 +15,7 @@
 // Flag for knowing if the alarm should be sonding
 bool alarmSounding = false;
 
-// Action for stopping the alarm 
+// Action for stopping the alarm
 bool stopAlarm(uint8_t param, bool gotParam)
 {
   alarmSounding = false;
@@ -39,7 +39,7 @@ void setup()
   Aquila.addAction("Stop Alarm", stopAlarm);
   Aquila.addAction("Sound Alarm", soundAlarm);
   // Announcing device
-  Aquila.announce(HUB);
+  Mesh.announce(HUB);
 }
 
 void loop()
@@ -47,7 +47,7 @@ void loop()
   // Attending requests
   Mesh.loop();
   Aquila.loop();
-  
+
   // make noise
   if(alarmSounding)
   {
@@ -60,12 +60,10 @@ void loop()
       // Dont delay too much or we could lose requests.
       delay(10);
     }
-    
+
   }
   else
   {
     noTone(BUZZER);
   }
 }
-
-

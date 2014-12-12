@@ -201,7 +201,10 @@ void txSendNow()
 	packet.dstAddr = bufPacket.dstAddr;
 	packet.dstEndpoint = bufPacket.dstEndpoint;
 	packet.srcEndpoint = bufPacket.srcEndpoint;
-	packet.options = 0;				// TODO: Check options, check if its ok for broadcast, or we need option...
+	if(Mesh.getSecurityEnabled())
+		packet.options = NWK_OPT_ENABLE_SECURITY;
+	else
+		packet.options = 0;
 	packet.data = bufPacket.data;
 	packet.size = bufPacket.size;
 	packet.confirm = txCb;

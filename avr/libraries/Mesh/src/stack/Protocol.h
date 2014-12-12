@@ -15,7 +15,7 @@ extern "C" {
 #endif
 
 #define PROTOCOL_ENDPOINT 13
-#define PROTOCOL_VERSION 2
+#define PROTOCOL_VERSION 3
 #define PROTOCOL_DEFAULT_ID "mx.makerlab.example"
 #define PROTOCOL_DEFAULT_NAME "Example"
 #define PROTOCOL_EUIADDRESSLEN 8

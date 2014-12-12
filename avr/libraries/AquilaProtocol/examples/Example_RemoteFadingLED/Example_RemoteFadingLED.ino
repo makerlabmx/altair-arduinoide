@@ -32,16 +32,16 @@ bool turnOn(uint8_t param, bool gotParam)
 void setup()
 {
   pinMode(LED, OUTPUT);
-  
+
   Mesh.begin();
   Aquila.begin();
   Aquila.setClass("mx.makerlab.fade");
   Aquila.setName("Fade");
-  
+
   Aquila.addAction("Off", turnOff);
   Aquila.addAction("Turn On with intensity", turnOn);
-  
-  Aquila.announce(BROADCAST);
+
+  Mesh.announce(HUB);
 }
 
 void loop()
@@ -49,5 +49,3 @@ void loop()
   Mesh.loop();
   Aquila.loop();
 }
-
-

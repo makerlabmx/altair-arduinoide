@@ -20,17 +20,17 @@ bool buttonLastState = HIGH;
 bool buttonIsPressed()
 {
   bool actualState = digitalRead(BUTTON);
-  
+
   if(actualState == LOW && buttonLastState == HIGH)
   {
     buttonLastState = LOW;
     return true;
   }
-  else if(actualState == HIGH) 
+  else if(actualState == HIGH)
   {
     buttonLastState = HIGH;
   }
-  
+
   return false;
 }
 
@@ -46,7 +46,7 @@ void setup()
   // Registering event
   buttonPressed = Aquila.addEvent("Button Pressed");
   // Anouncing device
-  Aquila.announce(HUB);
+  Mesh.announce(HUB);
 }
 
 void loop()
@@ -60,5 +60,3 @@ void loop()
     Aquila.emit(buttonPressed);
   }
 }
-
-

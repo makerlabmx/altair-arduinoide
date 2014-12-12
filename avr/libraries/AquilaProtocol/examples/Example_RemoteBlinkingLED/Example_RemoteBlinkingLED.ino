@@ -36,7 +36,7 @@ void setup()
   Aquila.addAction("Off", turnOff);
   Aquila.addAction("On", turnOn);
   // Anouncing device
-  Aquila.announce(BROADCAST);
+  Mesh.announce(HUB);
 }
 
 void loop()
@@ -45,5 +45,3 @@ void loop()
   Mesh.loop();
   Aquila.loop();
 }
-
-
