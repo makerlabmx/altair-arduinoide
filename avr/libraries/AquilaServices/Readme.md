@@ -39,3 +39,7 @@ Services: Things that you can ASK to the device and get a response
 WSerial: Logging and Debugging
 
 However, this is provided as a separate library because it's not always needed and is nice to have the option to choose.
+
+## Licence
+
+Use or modification of this software is subject to the Makerlab licence, please see ``license.txt`` for details.

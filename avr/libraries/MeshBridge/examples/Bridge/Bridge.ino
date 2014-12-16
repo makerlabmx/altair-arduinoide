@@ -3,6 +3,12 @@
 #include "AquilaBridge.h"
 
 /*
+	MeshBridge
+	This is the Firmware for the Altair that will act as a bridge interface between the Mesh network and the
+	Aquila Server. It implements a simple serial protocol for configuring it, sending and receiving Mesh packets.
+*/
+
+/*
 	New Data Format 10/11/14: Now we are using LWM, thus all MAC processing is done in the uC, we only send relevant data to PC.
 		lqi rssi srcAddr(16) dstAddr(16) srcEndpoint dstEndpoint frameSize [LWM Data]
 */

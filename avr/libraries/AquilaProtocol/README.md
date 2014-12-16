@@ -8,12 +8,10 @@ Now works over Mesh library.
 
 Internally uses short address, EUI Long address is used as unique identifier and for events.
 
-New Command:
+Now we use Mesh.anounce(HUB), and send EUI Address instead of class on end of setup
 
-PROTOCOL_COM_EUI 14
+In event emit, the EUI Address is appended to the message after param
 
-gets EUI, like get name, but with raw address.
+## Licence
 
-Now we use Aquila.anounce(BROADCAST), and send EUI Address instead of class on end of setup
-
-In event emmit, the EUI Address is appended to the message after param
+Use or modification of this software is subject to the Makerlab licence, please see ``license.txt`` for details.
