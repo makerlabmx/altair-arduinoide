@@ -50,7 +50,7 @@
 #include <Mesh.h>
 #include "lwm/nwk/nwk.h"
 
-#define TXPACKETRINGBUFFER_SIZE 10
+#define TXPACKETRINGBUFFER_SIZE 32
 
 typedef struct
 {

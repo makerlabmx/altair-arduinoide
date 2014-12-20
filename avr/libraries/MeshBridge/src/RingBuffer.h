@@ -48,7 +48,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define RINGBUFFER_SIZE 10
+#define RINGBUFFER_SIZE 32
 #define RINGBUFFER_DATA_SIZE 132
 
 typedef struct

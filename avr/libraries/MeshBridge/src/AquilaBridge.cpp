@@ -47,6 +47,8 @@
 #include "lwm/phy/phy.h"
 #include "stack/hal.h"
 
+#define BRIDGE_DEBUG
+
 #define TX_BUFFER_SIZE 132
 
 bool txDataReqBusy = false;
@@ -82,12 +84,12 @@ bool getChTimeOut(uint8_t *c, long timeOut)
 {
 	long lastTime = Hal_millis();
 	long now;
-	while(!Serial_available())
+	while(!Serial.available())
 	{
 		now = Hal_millis();
 		if( (now - lastTime) > timeOut ) return false;
 	}
-	*c = getchar();
+	*c = Serial.read();
 	return true;
 }
 
@@ -106,14 +108,14 @@ void sendBuffer(uint8_t buffer[], uint8_t size)
 
 	uint8_t i;
 	// Preamble:
-	putchar(0xAA);
-	putchar(0x55);
-	putchar(0xAA);
-	putchar(0x55);
+	Serial.write(0xAA);
+	Serial.write(0x55);
+	Serial.write(0xAA);
+	Serial.write(0x55);
 	// Data:
 	for(i = 0; i < size; i++)
 	{
-		putchar(buffer[i]);
+		Serial.write(buffer[i]);
 	}
 }
 
@@ -282,6 +284,9 @@ static bool rxHandler(NWK_DataInd_t *ind)
 	    }
     	RingBuffer_insert(&pktRxBuffer, &data);
     }
+    #ifdef BRIDGE_DEBUG
+		else Serial1.println("packet lost");
+	#endif
 
 }
 
@@ -301,8 +306,6 @@ bool serialHandler()
 	if(temp != 0x55) return false;
 	//Header ok, getting command
 	if(!getChTimeOut(&command, TIMEOUT)) return false;
-
-	//puts("gotCommand");
 
 	switch(command)
 	{
@@ -441,18 +444,25 @@ bool Bridge_init(uint16_t addr, uint8_t channel, uint16_t pan, bool promiscuous)
     	NWK_OpenEndpoint(i, rxHandler);
     }
 
-	Serial_init();
+	//Serial_init();
+	Serial.begin(57600);
 	// Anounce bridge ready to PC
 	sendStart();
 	delay(10);
 	sendLongAddr(bridgeAddress);
+
+	#ifdef BRIDGE_DEBUG
+		Serial1.begin(9600);
+		Serial1.println("Bridge Debug");
+	#endif
+
 	return true;
 }
 
 void Bridge_loop()
 {
 	Mesh.loop();
-	if(Serial_available()) serialHandler();
+	if(Serial.available()) serialHandler();
 	if(!RingBuffer_isEmpty(&pktRxBuffer))
 	{
 		RingBufferData data;
