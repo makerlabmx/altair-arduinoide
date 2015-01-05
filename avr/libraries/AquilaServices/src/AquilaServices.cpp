@@ -59,6 +59,9 @@ static void nwkTxCb(NWK_DataReq_t *req)
 
 static bool rxHandler(NWK_DataInd_t *ind)
 {
+	// if security enabled and the package was not secured, ignore it.
+	if( Mesh.getSecurityEnabled() && !(ind->options & NWK_IND_OPT_SECURED) ) return false;
+
 	if(ind->srcEndpoint != AQUILASERVICES_ENDPOINT || ind->dstEndpoint != AQUILASERVICES_ENDPOINT) return false;
 
 	/*
@@ -209,7 +212,10 @@ void AquilaServices::response(uint16_t destAddr, uint8_t method, char *data, uin
 	nwkPacket.dstAddr = destAddr;
 	nwkPacket.dstEndpoint = AQUILASERVICES_ENDPOINT;
 	nwkPacket.srcEndpoint = AQUILASERVICES_ENDPOINT;
-	nwkPacket.options = 0;
+	if(Mesh.getSecurityEnabled())
+		nwkPacket.options = NWK_OPT_ENABLE_SECURITY;
+	else
+		nwkPacket.options = 0;
 	nwkPacket.data = (uint8_t*)&pkt;
 	nwkPacket.size = dataSize + 4;
 	nwkPacket.confirm = nwkTxCb;

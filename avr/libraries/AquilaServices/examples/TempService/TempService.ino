@@ -71,6 +71,7 @@ void setup()
 	Services.add("temperature", tempService);
 
 	Serial.println("Temperature Service starting...");
+	Mesh.announce(HUB);
 }
 
 void loop()

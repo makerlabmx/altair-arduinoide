@@ -44,9 +44,13 @@
 static NWK_DataInd_t receivedPacket;
 static uint8_t receivedData[MAX_DATA_SIZE];
 static uint8_t flagGotPacket;
+static bool secEnabled;
 
 static bool Protocol__rxHandler(NWK_DataInd_t *ind)
 {
+	// if security enabled and the package was not secured, ignore it.
+	if( secEnabled && !(ind->options & NWK_IND_OPT_SECURED) ) return false;
+
 	receivedPacket.srcAddr = ind->srcAddr;
 	receivedPacket.size = ind->size;
 	for(int i = 0; i < ind->size; i++)
@@ -58,10 +62,10 @@ static bool Protocol__rxHandler(NWK_DataInd_t *ind)
 	return true;
 }
 
-int Protocol_init(Protocol *self, bool secEnabled)
+int Protocol_init(Protocol *self, bool _secEnabled)
 {
 	flagGotPacket = 0;
-	self->secEnabled = secEnabled;
+	secEnabled = _secEnabled;
 
 	// Get EUI Long Address from id chip
 	ID_init();
@@ -264,7 +268,7 @@ void Protocol_send(Protocol *self, uint16_t address, char *command, uint8_t size
 	packet.dstAddr = address;
 	packet.dstEndpoint = PROTOCOL_ENDPOINT;
 	packet.srcEndpoint = PROTOCOL_ENDPOINT;
-	if(self->secEnabled)
+	if(secEnabled)
 		packet.options = NWK_OPT_ENABLE_SECURITY;
 	else
 		packet.options = 0;

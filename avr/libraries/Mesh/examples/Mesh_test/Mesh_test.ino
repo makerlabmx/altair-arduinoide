@@ -6,13 +6,14 @@
 
 static bool receiveMessage(RxPacket *ind)
 {
+  // if security enabled and the package was not secured, ignore it.
+  if( Mesh.getSecurityEnabled() && !(ind->options & NWK_IND_OPT_SECURED) ) return false;
+
   Serial.print("Received message - From: ");
   Serial.println(ind->srcAddr, HEX);
 
   Serial.println(ind->size);
   Serial.println(ind->data[0]);
-
-
 
   if(ind->data[0] == 1)
   {
@@ -62,6 +63,7 @@ void setup()
   Serial.begin(9600);
   Mesh.begin(LOCAL_ADDRESS);
 
+  // Security encryption setup:
   uint8_t key[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
   Mesh.setSecurityKey(key);
   Mesh.setSecurityEnabled(true);
@@ -83,7 +85,7 @@ void setup()
 
   Mesh.openEndpoint(15, receiveMessage);
 
-  Mesh.announce(BROADCAST);
+  Mesh.announce(HUB);
 
 
   delay(100);

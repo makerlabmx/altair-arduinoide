@@ -157,8 +157,11 @@ static bool meshCb(RxPacket *ind)
 		// send ack
 		return true;
 	}
-	else	// size at least 1
+	else 	// size at least 1
 	{
+		// if security enabled and the package was not secured, ignore it.
+		if( secEnabled && !(ind->options & NWK_IND_OPT_SECURED) ) return false;
+
 		if(ind->data[0] == MESH_CMD_GETEUI)
 		{
 			sendEUI(ind->srcAddr);

@@ -259,35 +259,39 @@ void txSendNow()
 // Called on rx success, gets rx data
 static bool rxHandler(NWK_DataInd_t *ind)
 {
+	// if security enabled and the package was not secured, ignore it.
+	if( Mesh.getSecurityEnabled() && !(ind->options & NWK_IND_OPT_SECURED) ) return false;
 	// Adding received packet to buffer
 	// If buffer is full, ignore packet (lost)
-    if(!RingBuffer_isFull(&pktRxBuffer))
+  if(!RingBuffer_isFull(&pktRxBuffer))
+  {
+  	uint8_t i = 0, j = 0;
+  	RingBufferData data;
+  	data.size = ind->size + 10;
+
+  	data.data[j++] = CMD_DATA;
+  	data.data[j++] = ind->lqi;
+  	data.data[j++] = ind->rssi;
+  	data.data[j++] = ind->srcAddr;
+  	data.data[j++] = ind->srcAddr >> 8;
+  	data.data[j++] = ind->dstAddr;
+  	data.data[j++] = ind->dstAddr >> 8;
+  	data.data[j++] = ind->srcEndpoint;
+  	data.data[j++] = ind->dstEndpoint;
+  	data.data[j++] = ind->size;
+
+    for(i = 0; i < ind->size; i++)
     {
-    	uint8_t i = 0, j = 0;
-    	RingBufferData data;
-    	data.size = ind->size + 10;
-
-    	data.data[j++] = CMD_DATA;
-    	data.data[j++] = ind->lqi;
-    	data.data[j++] = ind->rssi;
-    	data.data[j++] = ind->srcAddr;
-    	data.data[j++] = ind->srcAddr >> 8;
-    	data.data[j++] = ind->dstAddr;
-    	data.data[j++] = ind->dstAddr >> 8;
-    	data.data[j++] = ind->srcEndpoint;
-    	data.data[j++] = ind->dstEndpoint;
-    	data.data[j++] = ind->size;
-
-	    for(i = 0; i < ind->size; i++)
-	    {
-	        data.data[j++] = ind->data[i];
-	    }
-    	RingBuffer_insert(&pktRxBuffer, &data);
+        data.data[j++] = ind->data[i];
     }
-    #ifdef BRIDGE_DEBUG
-		else Serial1.println("packet lost");
+  	RingBuffer_insert(&pktRxBuffer, &data);
+		return true;
+  }
+  #ifdef BRIDGE_DEBUG
+	else Serial1.println("packet lost");
 	#endif
 
+	return false;
 }
 
 bool serialHandler()

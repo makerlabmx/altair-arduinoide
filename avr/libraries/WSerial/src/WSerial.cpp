@@ -64,6 +64,8 @@ uint8_t _tx_buffer[WSERIAL_BUFFER_SIZE];
 
 static bool receiveMessage(NWK_DataInd_t *ind)
 {
+	// if security enabled and the package was not secured, ignore it.
+	if( Mesh.getSecurityEnabled() && !(ind->options & NWK_IND_OPT_SECURED) ) return false;
 	// Check if its from the address we are expecting,
 	// ignore otherwise
 	// If destAddress == BROADCAST, Accept all

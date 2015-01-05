@@ -7,6 +7,8 @@ Contents/Contenido:
 ### English:
 # Altair Hardware Definition and Libraries for the Arduino IDE
 
+**Note: ** This version is only compatible with Hub (aquila-server) version 0.1.0 or newer.
+
 ## Installation:
 
 Install Arduino IDE version 1.5.7 BETA or newer for your OS:
@@ -34,13 +36,15 @@ git clone https://github.com/makerlabmx/altair-arduinoide.git altair
 - Connect your Altair via the USB-Serial to your PC
 - In the menu bar, select Tools > Board > altair
 - Select the correct serial port in Tools > Port
-- For an example on using the Aquila libraries, select File > Examples > Aquila > template
+- For an example on using the Aquila libraries, select File > Examples > AquilaProtocol > template
 - Upload the example with the arrow icon in the IDE
 
 * * *
 
 ### Spanish:
 # Bibliotecas y definición de hardware de Altair para el IDE de Arduino
+
+**Nota: ** Esta versión es únicamente compatible con versiones 0.1.0 o superior del hub (aquila-server).
 
 ## Instalación:
 
@@ -69,5 +73,5 @@ git clone https://github.com/makerlabmx/altair-arduinoide.git altair
 - Conecta el Altair por medio del adaptador USB-Serial a tu PC
 - En la barra de menú, selecciona Herramientas > Placa > altair
 - Selecciona el puerto serial correspondiente en Herramientas > Port
-- Para ver un ejemplo del uso de las bibliotecas Aquila, selecciona Archivo > Ejemplos > Aquila > template
+- Para ver un ejemplo del uso de las bibliotecas Aquila, selecciona Archivo > Ejemplos > AquilaProtocol > template
 - Sube el ejemplo con el ícono de flecha en el IDE

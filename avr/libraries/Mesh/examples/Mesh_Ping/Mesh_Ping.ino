@@ -31,6 +31,9 @@ byte pingCounter = 0;
 
 static bool receiveMessage(RxPacket *ind)
 {
+	// if security enabled and the package was not secured, ignore it.
+	if( Mesh.getSecurityEnabled() && !(ind->options & NWK_IND_OPT_SECURED) ) return false;
+
 	// Toggle LED
 	ledState = !ledState;
 	digitalWrite(LED, ledState);
@@ -87,6 +90,7 @@ void setup()
 	Mesh.setAddr(LOCAL_ADDRESS);
 	Mesh.setPanId(0xCA5A);
 	Mesh.setChannel(0x1A);
+	// Security encryption setup:
 	uint8_t key[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
 	Mesh.setSecurityKey(key);
 	Mesh.setSecurityEnabled(true);
@@ -102,7 +106,7 @@ void setup()
 	// Ping every second
 	timer.setInterval(1000, sendMessage);
 
-	Mesh.announce(BROADCAST);
+	Mesh.announce(HUB);
 }
 
 void loop()

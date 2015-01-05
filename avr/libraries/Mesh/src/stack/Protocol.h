@@ -101,7 +101,6 @@ extern "C" {
 #define PROTOCOL_COM_EUI 14
 
 #define BROADCAST 0xFFFF
-#define HUB 0x00FF
 
 typedef struct
 {
@@ -121,11 +120,10 @@ typedef struct
 	uint8_t nEvents;
  	Action *actions[PROTOCOL_MAXACTIONS];
  	char *events[PROTOCOL_MAXEVENTS];
-	bool secEnabled;
 
 } Protocol;
 
-int Protocol_init(Protocol *self, bool secEnabled);
+int Protocol_init(Protocol *self, bool _secEnabled);
 
 void Protocol_setId(Protocol *self, char *nid);
 

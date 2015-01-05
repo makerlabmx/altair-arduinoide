@@ -47,6 +47,7 @@ void setup()
 	WSerial.begin(DEST);
 	// Setup timer to send temperature every 500ms
 	timer.setInterval(500, sendTemp);
+	Mesh.announce(HUB);
 }
 
 void loop()

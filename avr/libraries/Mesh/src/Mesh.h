@@ -48,6 +48,7 @@
 #include "lwm/nwk/nwk.h"
 
 #define BROADCAST 0xFFFF
+#define HUB 0x00FF
 
 #define AQUILAMESH_DEFPAN 0xCA5A
 #define AQUILAMESH_DEFCHAN 0x1A

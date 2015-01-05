@@ -37,6 +37,7 @@ void setup()
 	Mesh.begin(ADDR);
 	// Making a serial connection with DEST
 	WSerial.begin(DEST);
+	Mesh.announce(HUB);
 }
 
 void loop()
