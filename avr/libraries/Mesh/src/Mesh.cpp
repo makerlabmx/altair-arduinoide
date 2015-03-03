@@ -173,6 +173,7 @@ static bool meshCb(RxPacket *ind)
 AquilaMesh::AquilaMesh()
 {
 	secEnabled = false;
+	isAsleep = false;
 }
 
 // Begin with automatic address
@@ -300,6 +301,28 @@ uint16_t AquilaMesh::getShortAddr()
 void AquilaMesh::getEUIAddr(uint8_t* address)
 {
 	memcpy(address, euiAddr, 8);
+}
+
+bool AquilaMesh::busy()
+{
+	return NWK_Busy();
+}
+
+void AquilaMesh::sleep()
+{
+	NWK_SleepReq();
+	isAsleep = true;
+}
+
+void AquilaMesh::wakeup()
+{
+	NWK_WakeupReq();
+	isAsleep = false;
+}
+
+bool AquilaMesh::asleep()
+{
+	return isAsleep;
 }
 
 AquilaMesh Mesh;

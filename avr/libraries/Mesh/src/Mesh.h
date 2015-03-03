@@ -64,6 +64,7 @@
 class AquilaMesh
 {
 private:
+	bool isAsleep;
 public:
 	AquilaMesh();
 	void begin();
@@ -87,6 +88,12 @@ public:
 
 	uint16_t getShortAddr();
 	void getEUIAddr(uint8_t* address);
+
+	// For sleep management
+	bool busy();
+	void sleep();
+	void wakeup();
+	bool asleep();
 
 };
 
