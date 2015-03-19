@@ -257,6 +257,7 @@ static void Protocol__DataCb(NWK_DataReq_t *req)
 
 void Protocol_send(Protocol *self, uint16_t address, char *command, uint8_t size)
 {
+	uint8_t requestAck = 0;
 	// lose packet... check alternative TODO
 	if(protocolDataReqBusy) return;
 
@@ -268,10 +269,14 @@ void Protocol_send(Protocol *self, uint16_t address, char *command, uint8_t size
 	packet.dstAddr = address;
 	packet.dstEndpoint = PROTOCOL_ENDPOINT;
 	packet.srcEndpoint = PROTOCOL_ENDPOINT;
+	
+	if(address == BROADCAST) requestAck = 0;
+	else requestAck = NWK_OPT_ACK_REQUEST;
+
 	if(secEnabled)
-		packet.options = NWK_OPT_ENABLE_SECURITY;
+		packet.options = NWK_OPT_ENABLE_SECURITY | requestAck;
 	else
-		packet.options = 0;
+		packet.options = requestAck;
 	packet.data = data;
 	packet.size = (size + 1);
 	packet.confirm = Protocol__DataCb;

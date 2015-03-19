@@ -39,7 +39,7 @@
 */
 
 
-#include "AquilaBridge.h"
+#include "AquilaBridgeXpro.h"
 #include "RingBuffer.h"
 #include "TxPacketRingBuffer.h"
 #include "lwm/sys/sys.h"
@@ -47,7 +47,7 @@
 #include "lwm/phy/phy.h"
 #include "stack/hal.h"
 
-//#define BRIDGE_DEBUG
+// #define BRIDGE_DEBUG
 
 #define TX_BUFFER_SIZE 132
 
@@ -84,12 +84,12 @@ bool getChTimeOut(uint8_t *c, long timeOut)
 {
   long lastTime = Hal_millis();
   long now;
-  while(!Serial.available())
+  while(!Serial1.available())
   {
     now = Hal_millis();
     if( (now - lastTime) > timeOut ) return false;
   }
-  *c = Serial.read();
+  *c = Serial1.read();
   return true;
 }
 
@@ -108,14 +108,14 @@ void sendBuffer(uint8_t buffer[], uint8_t size)
 
   uint8_t i;
   // Preamble:
-  Serial.write(0xAA);
-  Serial.write(0x55);
-  Serial.write(0xAA);
-  Serial.write(0x55);
+  Serial1.write(0xAA);
+  Serial1.write(0x55);
+  Serial1.write(0xAA);
+  Serial1.write(0x55);
   // Data:
   for(i = 0; i < size; i++)
   {
-    Serial.write(buffer[i]);
+    Serial1.write(buffer[i]);
   }
 }
 
@@ -207,8 +207,8 @@ static void txCb(NWK_DataReq_t *req)
     */
 
     #ifdef BRIDGE_DEBUG
-    Serial1.print("txSuccess: ");
-    Serial1.println(req->status);
+    Serial.print("txSuccess: ");
+    Serial.println(req->status);
     #endif
 
     if(req->status == NWK_SUCCESS_STATUS)
@@ -247,13 +247,13 @@ void txSendNow()
   if(txDataReqBusy)
   { 
     #ifdef BRIDGE_DEBUG
-    Serial1.println("txDataReqBusy");
+    Serial.println("txDataReqBusy");
     #endif
     return; 
   } // Means we are not ready to send yet.
 
   #ifdef BRIDGE_DEBUG
-  Serial1.println("really sending packet");
+  Serial.println("really sending packet");
   #endif
 
   static TxBufPacket bufPacket;
@@ -263,25 +263,18 @@ void txSendNow()
   packet.dstAddr = bufPacket.dstAddr;
   packet.dstEndpoint = bufPacket.dstEndpoint;
   packet.srcEndpoint = bufPacket.srcEndpoint;
-
-  uint8_t requestAck = 0;
-  if(bufPacket.dstAddr == BROADCAST) requestAck = 0;
-  else requestAck = NWK_OPT_ACK_REQUEST;
-
   if(Mesh.getSecurityEnabled())
-    packet.options = NWK_OPT_ENABLE_SECURITY | requestAck;
+    packet.options = NWK_OPT_ENABLE_SECURITY | NWK_OPT_ACK_REQUEST;
   else
-    packet.options = requestAck;
-
+    packet.options = NWK_OPT_ACK_REQUEST;
   packet.data = bufPacket.data;
   packet.size = bufPacket.size;
   packet.confirm = txCb;
 
   #ifdef BRIDGE_DEBUG
-  Serial1.println(packet.dstAddr);
-  Serial1.println(packet.dstEndpoint);
-  Serial1.println(packet.srcEndpoint);
-  Serial1.println(packet.size);
+  Serial.println(packet.dstAddr);
+  Serial.println(packet.dstEndpoint);
+  Serial.println(packet.size);
   #endif
 
   NWK_DataReq(&packet);
@@ -319,12 +312,12 @@ static bool rxHandler(NWK_DataInd_t *ind)
     }
     RingBuffer_insert(&pktRxBuffer, &data);
     #ifdef BRIDGE_DEBUG
-    Serial1.println("got packet");
+    Serial.println("got packet");
     #endif
     return true;
   }
   #ifdef BRIDGE_DEBUG
-  else Serial1.println("packet lost");
+  else Serial.println("packet lost");
   #endif
 
   return false;
@@ -479,22 +472,21 @@ bool Bridge_init(uint16_t addr, uint8_t channel, uint16_t pan, bool promiscuous)
     TxRingBuffer_init(&txPktBuffer);
 
     // Subscribe handler for all endpoints
-    // 0 is reserved for LWM commands, dont use
-    for(int i = 1; i < 16; i++)
+    for(int i = 0; i < 16; i++)
     {
       NWK_OpenEndpoint(i, rxHandler);
     }
 
   //Serial_init();
-  Serial.begin(57600);
+  Serial1.begin(57600);
   // Anounce bridge ready to PC
   sendStart();
   delay(10);
   sendLongAddr(bridgeAddress);
 
   #ifdef BRIDGE_DEBUG
-    Serial1.begin(9600);
-    Serial1.println("Bridge Debug");
+    Serial.begin(9600);
+    Serial.println("Bridge Debug");
   #endif
 
   return true;
@@ -503,7 +495,7 @@ bool Bridge_init(uint16_t addr, uint8_t channel, uint16_t pan, bool promiscuous)
 void Bridge_loop()
 {
   Mesh.loop();
-  if(Serial.available()) serialHandler();
+  if(Serial1.available()) serialHandler();
   if(!RingBuffer_isEmpty(&pktRxBuffer))
   {
     RingBufferData data;

@@ -178,10 +178,16 @@ void AquilaServices::request(uint16_t destAddr, uint8_t method, char *name, void
 	nwkPacket.dstAddr = destAddr;
 	nwkPacket.dstEndpoint = AQUILASERVICES_ENDPOINT;
 	nwkPacket.srcEndpoint = AQUILASERVICES_ENDPOINT;
+
+	uint8_t requestAck = 0;
+  	if(destAddr == BROADCAST) requestAck = 0;
+  	else requestAck = NWK_OPT_ACK_REQUEST;
+
 	if(Mesh.getSecurityEnabled())
-		nwkPacket.options = NWK_OPT_ENABLE_SECURITY;
+		nwkPacket.options = NWK_OPT_ENABLE_SECURITY | requestAck;
 	else
-		nwkPacket.options = 0;
+		nwkPacket.options = requestAck;
+
 	nwkPacket.data = (uint8_t*)&pkt;
 	nwkPacket.size = pkt.nameSize + pkt.dataSize + 4;
 	nwkPacket.confirm = nwkTxCb;
@@ -212,10 +218,16 @@ void AquilaServices::response(uint16_t destAddr, uint8_t method, char *data, uin
 	nwkPacket.dstAddr = destAddr;
 	nwkPacket.dstEndpoint = AQUILASERVICES_ENDPOINT;
 	nwkPacket.srcEndpoint = AQUILASERVICES_ENDPOINT;
+
+	uint8_t requestAck = 0;
+  	if(destAddr == BROADCAST) requestAck = 0;
+  	else requestAck = NWK_OPT_ACK_REQUEST;
+
 	if(Mesh.getSecurityEnabled())
-		nwkPacket.options = NWK_OPT_ENABLE_SECURITY;
+		nwkPacket.options = NWK_OPT_ENABLE_SECURITY | requestAck;
 	else
-		nwkPacket.options = 0;
+		nwkPacket.options = requestAck;
+	
 	nwkPacket.data = (uint8_t*)&pkt;
 	nwkPacket.size = dataSize + 4;
 	nwkPacket.confirm = nwkTxCb;

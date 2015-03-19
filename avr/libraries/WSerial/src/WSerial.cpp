@@ -184,10 +184,16 @@ void WirelessSerial::sendPacketNow()
 	packet.dstAddr = destAddress;
 	packet.dstEndpoint = WSERIAL_ENDPOINT;
 	packet.srcEndpoint = WSERIAL_ENDPOINT;
+
+	uint8_t requestAck = 0;
+  	if(destAddress == BROADCAST) requestAck = 0;
+  	else requestAck = NWK_OPT_ACK_REQUEST;
+
 	if(Mesh.getSecurityEnabled())
-		packet.options = NWK_OPT_ENABLE_SECURITY;
+		packet.options = NWK_OPT_ENABLE_SECURITY | requestAck;
 	else
-		packet.options = 0;
+		packet.options = requestAck;
+	
 	packet.data = packetData;
 	packet.size = size;
 	packet.confirm = appDataCb;
