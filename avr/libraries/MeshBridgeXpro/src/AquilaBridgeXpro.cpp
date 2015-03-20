@@ -47,7 +47,7 @@
 #include "lwm/phy/phy.h"
 #include "stack/hal.h"
 
-// #define BRIDGE_DEBUG
+//#define BRIDGE_DEBUG
 
 #define TX_BUFFER_SIZE 132
 
@@ -263,10 +263,16 @@ void txSendNow()
   packet.dstAddr = bufPacket.dstAddr;
   packet.dstEndpoint = bufPacket.dstEndpoint;
   packet.srcEndpoint = bufPacket.srcEndpoint;
+
+  uint8_t requestAck = 0;
+  if(bufPacket.dstAddr == BROADCAST) requestAck = 0;
+  else requestAck = NWK_OPT_ACK_REQUEST;
+
   if(Mesh.getSecurityEnabled())
-    packet.options = NWK_OPT_ENABLE_SECURITY | NWK_OPT_ACK_REQUEST;
+    packet.options = NWK_OPT_ENABLE_SECURITY | requestAck;
   else
-    packet.options = NWK_OPT_ACK_REQUEST;
+    packet.options = requestAck;
+
   packet.data = bufPacket.data;
   packet.size = bufPacket.size;
   packet.confirm = txCb;
@@ -274,6 +280,7 @@ void txSendNow()
   #ifdef BRIDGE_DEBUG
   Serial.println(packet.dstAddr);
   Serial.println(packet.dstEndpoint);
+  Serial.println(packet.srcEndpoint);
   Serial.println(packet.size);
   #endif
 
@@ -472,7 +479,8 @@ bool Bridge_init(uint16_t addr, uint8_t channel, uint16_t pan, bool promiscuous)
     TxRingBuffer_init(&txPktBuffer);
 
     // Subscribe handler for all endpoints
-    for(int i = 0; i < 16; i++)
+    // 0 is reserved for LWM commands, dont use
+    for(int i = 1; i < 16; i++)
     {
       NWK_OpenEndpoint(i, rxHandler);
     }
