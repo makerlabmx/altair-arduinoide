@@ -12,15 +12,25 @@
 // Altair's internal red LED
 #define LED 13
 
+bool ledState = LOW;
+
 // Actions: turn on and off the LED
 bool turnOff(uint8_t param, bool gotParam)
 {
-  digitalWrite(LED, HIGH);
+  ledState = HIGH;
+  digitalWrite(LED, ledState);
 }
 
 bool turnOn(uint8_t param, bool gotParam)
 {
-    digitalWrite(LED, LOW);
+  ledState = LOW;
+  digitalWrite(LED, ledState);
+}
+
+bool toggle(uint8_t param, bool gotParam)
+{
+  ledState = !ledState;
+  digitalWrite(LED, ledState);
 }
 
 void setup()
@@ -35,6 +45,7 @@ void setup()
   // Registering actions
   Aquila.addAction("Off", turnOff);
   Aquila.addAction("On", turnOn);
+  Aquila.addAction("Toggle", toggle);
   // Anouncing device
   Mesh.announce(HUB);
 }

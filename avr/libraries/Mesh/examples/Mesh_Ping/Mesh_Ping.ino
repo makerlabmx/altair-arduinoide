@@ -99,8 +99,8 @@ void setup()
 	Serial.print("Local Address: ");
 	Serial.println(Mesh.getShortAddr());
 
-	// Open an endpoint, something like the Ports in TCP/IP
-	// You can use endpoints 0 to 7
+	// Open an endpoint, similar to the Ports in TCP/IP
+	// You can use endpoints 1 to 7
 	Mesh.openEndpoint(1, receiveMessage);
 
 	// Ping every second
