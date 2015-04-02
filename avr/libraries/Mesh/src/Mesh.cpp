@@ -137,10 +137,15 @@ void sendEUI(uint16_t dest)
 	packet.dstAddr = dest;
 	packet.dstEndpoint = MESH_ADDRENDPOINT;
 	packet.srcEndpoint = MESH_ADDRENDPOINT;
+
+	uint8_t requestAck = 0;
+	if(dest == BROADCAST) requestAck = 0;
+	else requestAck = NWK_OPT_ACK_REQUEST;
+
 	if(secEnabled)
-		packet.options = NWK_OPT_ENABLE_SECURITY;
+		packet.options = requestAck | NWK_OPT_ENABLE_SECURITY;
 	else
-		packet.options = 0;
+		packet.options = requestAck;
 	packet.data = data;
 	packet.size = 9;
 	packet.confirm = euiCb;

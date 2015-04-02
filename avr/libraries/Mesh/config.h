@@ -14,7 +14,7 @@
 #define NWK_ACK_WAIT_TIME 500
 #define NWK_ENABLE_ROUTING
 #define NWK_ENABLE_SECURITY
-#define NWK_ENABLE_SECURE_COMMANDS
+//#define NWK_ENABLE_SECURE_COMMANDS	// Breaks unsecured acknowledges
 // 0: AES-128
 #define SYS_SECURITY_MODE 0
 
