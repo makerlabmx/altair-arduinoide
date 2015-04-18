@@ -1,5 +1,5 @@
 /**
-* \file Mesh.h
+* \file TxBuffer.cpp
 *
 * \brief Aquila 802.15.4 Mesh implementation.
 *
@@ -38,66 +38,78 @@
 *
 */
 
-#ifndef AQUILAMESH_H
-#define AQUILAMESH_H
 
-#include <Arduino.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include "lwm/sys/sys.h"
-#include "lwm/nwk/nwk.h"
+#include "TxBuffer.h"
 
-#define BROADCAST 0xFFFF
-#define HUB 0x00FF
-
-#define AQUILAMESH_DEFPAN 0xCA5A
-#define AQUILAMESH_DEFCHAN 0x1A
-
-// According to Atmel-42028-Lightweight-Mesh-Developer-Guide_Application-Note_AVR2130,
-// Max payload size is 105 with security and 32bit MIC and 109 without security
-#define AQUILAMESH_MAXPAYLOAD (NWK_MAX_PAYLOAD_SIZE - 4)/*Security 32bit MIC*/
-
-// Frendlier names for LWM types
-#define TxPacket NWK_DataReq_t
-#define RxPacket NWK_DataInd_t
-
-class AquilaMesh
+void TxBufPacket_init(TxBufPacket* bufPacket, TxPacket* packet)
 {
-private:
-	bool isAsleep;
-public:
-	AquilaMesh();
-	bool begin();
-	bool begin(uint16_t addr);
+	// Copy the data of the packet to the bufPacket
+	memcpy(bufPacket->data, packet->data, sizeof(packet->data));
+	// Copy the packet inside bufPacket
+	bufPacket->packet = *packet;
+	// Update data pointer of packet
+	bufPacket->packet.data = bufPacket->data;
+}
 
-	void end();
 
-	void loop();
+void TxBuffer_init(TxBuffer* buffer)
+{
+	ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+	{
+		buffer->head = buffer->buffer;
+		buffer->tail = buffer->buffer;
+		buffer->count = 0;
+	}
+}
 
-	void setAddr(uint16_t addr);
-	void setPanId(uint16_t panId);
-	void setChannel(uint8_t channel);
-	void setSecurityKey(uint8_t *key);
-	void setSecurityEnabled(bool enabled);
-	bool getSecurityEnabled();
-	void openEndpoint(uint8_t id, bool (*handler)(RxPacket *ind));
+bool TxBuffer_isFull(TxBuffer* buffer)
+{
+	uint8_t count;
+	ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+	{
+		count = buffer->count;
+	}
+	return count == MESHTXBUFFER_SIZE;
+}
 
-	bool sendPacket(TxPacket *packet);
-	void sendNow();
+bool TxBuffer_isEmpty(TxBuffer* buffer)
+{
+	uint8_t count;
+	ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+	{
+		count = buffer->count;
+	}
+	return count == 0;
+}
 
-	void announce(uint16_t dest);
+void TxBuffer_insert(TxBuffer* buffer, TxBufPacket* data)
+{
 
-	uint16_t getShortAddr();
-	void getEUIAddr(uint8_t* address);
+	memcpy(buffer->head, data, sizeof(TxBufPacket));
 
-	// For sleep management
-	bool busy();
-	void sleep();
-	void wakeup();
-	bool asleep();
+	if (++buffer->head == &buffer->buffer[MESHTXBUFFER_SIZE])
+	{
+		buffer->head = buffer->buffer;
+	}
 
-};
+	ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+	{
+		buffer->count++;
+	}
+}
 
-extern AquilaMesh Mesh;
+void TxBuffer_remove(TxBuffer* buffer, TxBufPacket* data)
+{
+	memcpy(data, buffer->tail, sizeof(TxBufPacket));
 
-#endif //AQUILAMESH_H
+	if (++buffer->tail == &buffer->buffer[MESHTXBUFFER_SIZE])
+	{
+		buffer->tail = buffer->buffer;
+	}
+
+
+	ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+	{
+		buffer->count--;
+	}
+}

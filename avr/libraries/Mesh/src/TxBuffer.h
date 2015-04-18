@@ -1,5 +1,5 @@
 /**
-* \file Mesh.h
+* \file TxBuffer.h
 *
 * \brief Aquila 802.15.4 Mesh implementation.
 *
@@ -38,66 +38,48 @@
 *
 */
 
-#ifndef AQUILAMESH_H
-#define AQUILAMESH_H
 
-#include <Arduino.h>
+#ifndef MESHTXBUFFER_H
+#define MESHTXBUFFER_H
+
+#include <util/atomic.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "lwm/sys/sys.h"
+#include <string.h>
+#include <stdlib.h>
+#include <Mesh.h>
 #include "lwm/nwk/nwk.h"
 
-#define BROADCAST 0xFFFF
-#define HUB 0x00FF
+#define MESHTXBUFFER_SIZE 16
 
-#define AQUILAMESH_DEFPAN 0xCA5A
-#define AQUILAMESH_DEFCHAN 0x1A
-
-// According to Atmel-42028-Lightweight-Mesh-Developer-Guide_Application-Note_AVR2130,
-// Max payload size is 105 with security and 32bit MIC and 109 without security
-#define AQUILAMESH_MAXPAYLOAD (NWK_MAX_PAYLOAD_SIZE - 4)/*Security 32bit MIC*/
-
-// Frendlier names for LWM types
-#define TxPacket NWK_DataReq_t
-#define RxPacket NWK_DataInd_t
-
-class AquilaMesh
+// We have to define data appart because in TxPacket, data is a pointer, and we need storage space.
+// When creating TxPacket, we should first copy data contents, then copy the packet and redefine its 
+// data poiner.
+typedef struct
 {
-private:
-	bool isAsleep;
-public:
-	AquilaMesh();
-	bool begin();
-	bool begin(uint16_t addr);
+	TxPacket packet;
+	uint8_t data[AQUILAMESH_MAXPAYLOAD];
 
-	void end();
+} TxBufPacket;
 
-	void loop();
+void TxBufPacket_init(TxBufPacket* bufPacket, TxPacket* packet);
 
-	void setAddr(uint16_t addr);
-	void setPanId(uint16_t panId);
-	void setChannel(uint8_t channel);
-	void setSecurityKey(uint8_t *key);
-	void setSecurityEnabled(bool enabled);
-	bool getSecurityEnabled();
-	void openEndpoint(uint8_t id, bool (*handler)(RxPacket *ind));
+typedef struct
+{
+	TxPacket buffer[MESHTXBUFFER_SIZE];
+	TxPacket *head;
+	TxPacket *tail;
+	uint8_t count;
+} TxBuffer;
 
-	bool sendPacket(TxPacket *packet);
-	void sendNow();
+void TxBuffer_init(TxBuffer* buffer);
 
-	void announce(uint16_t dest);
+bool TxBuffer_isFull(TxBuffer* buffer);
 
-	uint16_t getShortAddr();
-	void getEUIAddr(uint8_t* address);
+bool TxBuffer_isEmpty(TxBuffer* buffer);
 
-	// For sleep management
-	bool busy();
-	void sleep();
-	void wakeup();
-	bool asleep();
+void TxBuffer_insert(TxBuffer* buffer, TxBufPacket* data);
 
-};
+void TxBuffer_remove(TxBuffer* buffer, TxBufPacket* data);
 
-extern AquilaMesh Mesh;
-
-#endif //AQUILAMESH_H
+#endif // MESHTXBUFFER_H
