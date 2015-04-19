@@ -50,7 +50,7 @@
 #include <Mesh.h>
 #include "lwm/nwk/nwk.h"
 
-#define MESHTXBUFFER_SIZE 16
+#define MESHTXBUFFER_SIZE 8
 
 // We have to define data appart because in TxPacket, data is a pointer, and we need storage space.
 // When creating TxPacket, we should first copy data contents, then copy the packet and redefine its 
@@ -66,9 +66,9 @@ void TxBufPacket_init(TxBufPacket* bufPacket, TxPacket* packet);
 
 typedef struct
 {
-	TxPacket buffer[MESHTXBUFFER_SIZE];
-	TxPacket *head;
-	TxPacket *tail;
+	TxBufPacket buffer[MESHTXBUFFER_SIZE];
+	TxBufPacket *head;
+	TxBufPacket *tail;
 	uint8_t count;
 } TxBuffer;
 
@@ -78,8 +78,8 @@ bool TxBuffer_isFull(TxBuffer* buffer);
 
 bool TxBuffer_isEmpty(TxBuffer* buffer);
 
-void TxBuffer_insert(TxBuffer* buffer, TxBufPacket* data);
+bool TxBuffer_insert(TxBuffer* buffer, TxBufPacket* data);
 
-void TxBuffer_remove(TxBuffer* buffer, TxBufPacket* data);
+bool TxBuffer_remove(TxBuffer* buffer, TxBufPacket* data);
 
 #endif // MESHTXBUFFER_H

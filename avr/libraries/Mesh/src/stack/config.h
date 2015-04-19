@@ -17,9 +17,6 @@
 #define PROTOCOL_MAXACTIONS 100
 #define PROTOCOL_MAXEVENTS 100
 
-// Use secured conections.
-#define PHY_SECURITY_ENABLED 0
-
 // Max data size
 //AQUILAMESH_MAXPAYLOAD
 #define MAX_DATA_SIZE 105

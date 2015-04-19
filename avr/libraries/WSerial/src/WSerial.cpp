@@ -47,7 +47,7 @@
 #include "lwm/nwk/nwk.h"
 #include "WSerial.h"
 
-static NWK_DataReq_t packet;
+static TxPacket packet;
 uint8_t packetData[WSERIAL_BUFFER_SIZE];
 
 uint16_t destAddress;
@@ -62,10 +62,8 @@ bool appDataReqBusy = false;
 uint8_t _rx_buffer[WSERIAL_BUFFER_SIZE];
 uint8_t _tx_buffer[WSERIAL_BUFFER_SIZE];
 
-static bool receiveMessage(NWK_DataInd_t *ind)
+static bool receiveMessage(RxPacket *ind)
 {
-	// if security enabled and the package was not secured, ignore it.
-	if( Mesh.getSecurityEnabled() && !(ind->options & NWK_IND_OPT_SECURED) ) return false;
 	// Check if its from the address we are expecting,
 	// ignore otherwise
 	// If destAddress == BROADCAST, Accept all
@@ -83,7 +81,7 @@ static bool receiveMessage(NWK_DataInd_t *ind)
 	_rx_buffer_head = (_rx_buffer_head + ind->size) % WSERIAL_BUFFER_SIZE;
 }
 
-static void appDataCb(NWK_DataReq_t *req)
+static void appDataCb(TxPacket *req)
 {
   appDataReqBusy = false;
   (void)req;
@@ -94,9 +92,7 @@ void WirelessSerial::begin(uint16_t destAddr)
 	_rx_buffer_head = _rx_buffer_tail = 0;
 	_tx_buffer_head = _tx_buffer_tail = 0;
 	setDest(destAddr);
-	// SYS_Init(); Should init in Mesh.begin()
-	PHY_SetRxState(true);
-	NWK_OpenEndpoint(WSERIAL_ENDPOINT, receiveMessage);
+	Mesh.openEndpoint(WSERIAL_ENDPOINT, receiveMessage);
 }
 
 void WirelessSerial::setDest(uint16_t destAddr)
@@ -112,7 +108,8 @@ void WirelessSerial::setAllowFromAny(bool allow)
 
 void WirelessSerial::end()
 {
-	PHY_SetRxState(false);
+	// set destination to an invalid address for avoiding connecions
+	setDest(0);
 }
 
 int WirelessSerial::available(void)
@@ -189,15 +186,11 @@ void WirelessSerial::sendPacketNow()
   	if(destAddress == BROADCAST) requestAck = 0;
   	else requestAck = NWK_OPT_ACK_REQUEST;
 
-	if(Mesh.getSecurityEnabled())
-		packet.options = NWK_OPT_ENABLE_SECURITY | requestAck;
-	else
-		packet.options = requestAck;
-	
+  	packet.options = requestAck;
 	packet.data = packetData;
 	packet.size = size;
 	packet.confirm = appDataCb;
-	NWK_DataReq(&packet);
+	Mesh.sendPacket(&packet);
 
 	appDataReqBusy = true;
 }

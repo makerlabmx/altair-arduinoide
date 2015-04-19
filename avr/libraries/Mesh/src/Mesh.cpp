@@ -50,10 +50,11 @@
 #include "Mesh.h"
 #include "TxBuffer.h"
 
-#define MESH_ADDRENDPOINT 15
-#define MESH_CMD_GETEUI 0
-#define MESH_CMD_RESEUI 1
 /////
+
+static bool secEnabled;
+static uint8_t euiAddr[8];
+static uint16_t shortAddr;
 
 // Transmission management
 static TxBuffer txBuffer;
@@ -65,186 +66,74 @@ void txConfirm(TxPacket *packet)
 	txBusy = false;
 	// Call user callback
 	if(txUserConfirm != NULL) txUserConfirm(packet);
+	txUserConfirm = NULL;
+	(void)packet;
+}
+
+// Reception management
+// TODO: use buffer
+static RxPacket rxPendPacket;
+static uint8_t rxPendingData[AQUILAMESH_MAXPAYLOAD];
+static bool rxPending = false;
+
+bool (*rxCallbacks[16])(RxPacket *ind);
+
+bool rxBootstrap(RxPacket *ind)
+{
+	if(rxPending) return false;
+	// Enforce security
+	// if security enabled and the package was not secured, ignore it.
+	if( secEnabled && !(ind->options & NWK_IND_OPT_SECURED) ) return false;
+
+	rxPendPacket = *ind;
+	memcpy(rxPendingData, ind->data, ind->size);
+	rxPendPacket.data = rxPendingData;
+	rxPending = true;
+	// Send Ack imediately
+	// TODO: consider configuring Ack for sending rssi
+	return true;
+}
+
+void rxAttendPend()
+{
+	// If ack pending (busy), dont attend yet.
+	if(!rxPending || NWK_Busy()) return;
+
+	if(rxCallbacks[rxPendPacket.dstEndpoint] != NULL)
+	{
+		rxCallbacks[rxPendPacket.dstEndpoint](&rxPendPacket);
+	}
+	rxPending = false;
 }
 
 /////
 
-static TxPacket packet;
 
-static uint16_t shortAddr;
-static uint16_t genAddr;
-static bool waitingAddrConfirm;
-static bool addrAssignSuccess;
-static bool secEnabled;
-static uint8_t euiAddr[8];
-uint16_t calcrc(uint8_t *ptr, int count);
-static void pingCb(TxPacket *req);
-void sendEUI(uint16_t dest);
-static bool meshCb(RxPacket *ind);
-void assignAddr(uint8_t *id);
-
-uint16_t calcrc(uint8_t *ptr, int count)
-{
-	int crc;
-	char i;
-	crc = 0;
-	while (--count >= 0)
-	{
-		crc = crc ^ (int) *ptr++ << 8;
-		i = 8;
-		do
-		{
-			if (crc & 0x8000)
-			crc = crc << 1 ^ 0x1021;
-			else
-			crc = crc << 1;
-		} while(--i);
-	}
-	return (crc);
-}
-
-static void pingCb(TxPacket *req)
-{
-	#ifdef MESH_DEBUG
-	printf("pingCb, status: %x\n", req->status);
-	#endif
-	waitingAddrConfirm = false;
-
-	if(req->status == NWK_SUCCESS_STATUS)
-	{
-		// Got Ack, means someone else has the address
-		addrAssignSuccess = false;
-	}
-	else
-	{	// If didnt get ack, means the address is free, use it.
-		addrAssignSuccess = true;
-		shortAddr = genAddr;
-		NWK_SetAddr(shortAddr);
-		#ifdef MESH_DEBUG
-		printf("%x\n", genAddr);
-		#endif
-	}
-
-	(void)req;
-}
-
-// This needs to be treated separatedly outside of mesh...
-bool euiBusy = false;
-
-void euiCb(TxPacket* packet)
-{
-	euiBusy = false;
-}
-
-void sendEUI(uint16_t dest)
-{
-	if(euiBusy) return;
-	static uint8_t data[9];
-	data[0] = MESH_CMD_RESEUI;
-
-	// copy eui
-	memcpy(&data[1], euiAddr, 8);
-
-	packet.dstAddr = dest;
-	packet.dstEndpoint = MESH_ADDRENDPOINT;
-	packet.srcEndpoint = MESH_ADDRENDPOINT;
-
-	uint8_t requestAck = 0;
-	if(dest == BROADCAST) requestAck = 0;
-	else requestAck = NWK_OPT_ACK_REQUEST;
-
-	if(secEnabled)
-		packet.options = requestAck | NWK_OPT_ENABLE_SECURITY;
-	else
-		packet.options = requestAck;
-
-	packet.data = data;
-	packet.size = 9;
-	packet.confirm = euiCb;
-	
-	euiBusy = true;
-	NWK_DataReq(&packet);
-}
-
-static bool meshCb(RxPacket *ind)
-{
-	// check if address collision packet
-	if(ind->size == 0)	// address collision packet
-	{
-		// send ack
-		return true;
-	}
-	else 	// size at least 1
-	{
-		// if security enabled and the package was not secured, ignore it.
-		if( secEnabled && !(ind->options & NWK_IND_OPT_SECURED) ) return false;
-
-		if(ind->data[0] == MESH_CMD_GETEUI)
-		{
-			sendEUI(ind->srcAddr);
-		}
-	}
-	return true;
-}
-
-void assignAddr(uint8_t *id)
-{
-	genAddr = calcrc(id, 8);
-	// Check if we are not in manual address range, and fix.
-	if(genAddr < 256) genAddr += 256;
-
-	//test collision:
-	//genAddr = 3;
-
-	while(!addrAssignSuccess)
-	{
-		// Send a ping packet to our generated address to check if its already taken
-		packet.dstAddr = genAddr;
-		packet.dstEndpoint = MESH_ADDRENDPOINT;
-		packet.srcEndpoint = MESH_ADDRENDPOINT;
-		packet.options = NWK_OPT_ACK_REQUEST | NWK_OPT_ENABLE_SECURITY;	// Don't know why, but without NWK_OPT_ENABLE_SECURITY, it doesn't work
-		packet.data = NULL;
-		packet.size = 0;
-		packet.confirm = pingCb;
-		NWK_DataReq(&packet);
-
-		waitingAddrConfirm = true;
-
-		while(waitingAddrConfirm)
-		{
-			SYS_TaskHandler();
-		}
-
-		// If address already in use, try with another one
-		if(!addrAssignSuccess) genAddr += 1 + id[7];
-	}
-}
 
 AquilaMesh::AquilaMesh()
 {
 	secEnabled = false;
 	isAsleep = false;
 	shortAddr = 0;
-	genAddr = 0;
-	waitingAddrConfirm = false;
-	addrAssignSuccess = false;
 	TxBuffer_init(&txBuffer);
 	txUserConfirm = NULL;
+	txBusy = false;
+
+	// Zeroing rxCallbacks
+	for(int i = 0; i < 16; i++)
+	{
+		rxCallbacks[i] = NULL;
+	}
 }
 
 // Begin with automatic address
 bool AquilaMesh::begin()
 {
-	#ifdef MESH_DEBUG
-	Serial_init();
-	#endif
 	// Init as address 0:
 	if(!begin(0)) return false;
 
-	uint8_t id[8];
-	getEUIAddr(id);
-
-	assignAddr(id);
+	shortAddr = meshControl.assignAddr(euiAddr);
+	NWK_SetAddr(shortAddr);
 
 	return true;
 }
@@ -263,7 +152,7 @@ bool AquilaMesh::begin(uint16_t addr)
 	ID_init();
 	if( !ID_getId(euiAddr) ) return false;        //Error
 
-	NWK_OpenEndpoint(MESH_ADDRENDPOINT, meshCb);
+	meshControl.begin(this);
 	return true;
 }
 
@@ -275,6 +164,8 @@ void AquilaMesh::end()
 void AquilaMesh::loop()
 {
 	SYS_TaskHandler();
+	// Attend any pending packets
+	rxAttendPend();
 	// Send any pending packets
 	sendNow();
 }
@@ -311,7 +202,8 @@ bool AquilaMesh::getSecurityEnabled()
 
 void AquilaMesh::openEndpoint(uint8_t id, bool (*handler)(RxPacket *ind))
 {
-	NWK_OpenEndpoint(id, handler);
+	rxCallbacks[id] = handler;
+	NWK_OpenEndpoint(id, rxBootstrap);
 }
 
 bool AquilaMesh::sendPacket(TxPacket *packet)
@@ -321,17 +213,18 @@ bool AquilaMesh::sendPacket(TxPacket *packet)
 	TxBufPacket bufPacket;
 	TxBufPacket_init(&bufPacket, packet);
 
-	TxBuffer_insert(&txBuffer, &bufPacket);
-	// Try to send now
-	sendNow();
+	if(!TxBuffer_insert(&txBuffer, &bufPacket)) return false;
+
+	return true;
 }
 
 void AquilaMesh::sendNow()
 {
-	if(TxBuffer_isEmpty(&txBuffer) || txBusy) return;
+	if(TxBuffer_isEmpty(&txBuffer) || txBusy || NWK_Busy()) return;
 	// Get package from buffer
-	TxBufPacket bufPacket;
-	TxBuffer_remove(&txBuffer, &bufPacket);
+	static TxBufPacket bufPacket;
+	if(!TxBuffer_remove(&txBuffer, &bufPacket)) return;
+	bufPacket.packet.data = bufPacket.data;
 
 	// Enforce security
 	if(secEnabled)
@@ -344,15 +237,17 @@ void AquilaMesh::sendNow()
 	txUserConfirm = bufPacket.packet.confirm;
 	// Assign our callback for tx control
 	bufPacket.packet.confirm = txConfirm;
+	
+	txBusy = true;
+
 	// Request send to nwk layer
 	NWK_DataReq(&bufPacket.packet);
-	txBusy = true;
 }
 
 // Announce device to the network
 void AquilaMesh::announce(uint16_t dest)
 {
-	sendEUI(dest);
+	meshControl.sendEUI(dest);
 }
 
 uint16_t AquilaMesh::getShortAddr()

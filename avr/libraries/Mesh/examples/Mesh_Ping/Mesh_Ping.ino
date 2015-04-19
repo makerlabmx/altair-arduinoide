@@ -31,9 +31,6 @@ byte pingCounter = 0;
 
 static bool receiveMessage(RxPacket *ind)
 {
-	// if security enabled and the package was not secured, ignore it.
-	if( Mesh.getSecurityEnabled() && !(ind->options & NWK_IND_OPT_SECURED) ) return false;
-
 	// Toggle LED
 	ledState = !ledState;
 	digitalWrite(LED, ledState);
@@ -69,10 +66,8 @@ static void sendMessage(void)
 	packet.dstAddr = DESTINATION_ADDRESS;
 	packet.dstEndpoint = 1;
 	packet.srcEndpoint = 1;
-	if(Mesh.getSecurityEnabled())
-		packet.options = NWK_OPT_ENABLE_SECURITY;
-	else
-		packet.options = 0;
+	// Request acknowledge, use only if not sending to BROADCAST
+	packet.options = NWK_OPT_ACK_REQUEST;
 	packet.data = &pingCounter;
 	packet.size = sizeof(pingCounter);
 	packet.confirm = pingConfirm;

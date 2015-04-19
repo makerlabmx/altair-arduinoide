@@ -6,8 +6,6 @@
 
 static bool receiveMessage(RxPacket *ind)
 {
-  // if security enabled and the package was not secured, ignore it.
-  if( Mesh.getSecurityEnabled() && !(ind->options & NWK_IND_OPT_SECURED) ) return false;
 
   Serial.print("Received message - From: ");
   Serial.println(ind->srcAddr, HEX);
@@ -48,10 +46,8 @@ static void sendMessage(void)
   packet.dstAddr = DESTINATION_ADDRESS;
   packet.dstEndpoint = 15;
   packet.srcEndpoint = 15;
-  if(Mesh.getSecurityEnabled())
-    packet.options = NWK_OPT_ENABLE_SECURITY;
-  else
-    packet.options = 0;
+  // Request acknowledge, use only if not sending to BROADCAST
+  packet.options = NWK_OPT_ACK_REQUEST;
   packet.data = data;
   packet.size = 1;
   packet.confirm = pingConfirm;
@@ -86,7 +82,6 @@ void setup()
   Mesh.openEndpoint(15, receiveMessage);
 
   Mesh.announce(HUB);
-
 
   delay(100);
 

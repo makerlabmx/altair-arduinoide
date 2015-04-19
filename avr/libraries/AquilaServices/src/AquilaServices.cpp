@@ -43,25 +43,22 @@
 #include "Mesh.h"
 #include <string.h>
 
-static NWK_DataReq_t nwkPacket;
-bool nwkTxBusy = false;
+static TxPacket nwkPacket;
+//bool nwkTxBusy = false;
 
 Service services[AQUILASERVICES_MAX];
 void (*lastReqCb)(uint16_t srcAddr, uint8_t status, char *data, uint8_t dataSize);
 bool waitingResponse;
 double lastRequestTime;
 
-static void nwkTxCb(NWK_DataReq_t *req)
+static void nwkTxCb(TxPacket *req)
 {
-	nwkTxBusy = false;
+	//nwkTxBusy = false;
 	(void) req;
 }
 
-static bool rxHandler(NWK_DataInd_t *ind)
+static bool rxHandler(RxPacket *ind)
 {
-	// if security enabled and the package was not secured, ignore it.
-	if( Mesh.getSecurityEnabled() && !(ind->options & NWK_IND_OPT_SECURED) ) return false;
-
 	if(ind->srcEndpoint != AQUILASERVICES_ENDPOINT || ind->dstEndpoint != AQUILASERVICES_ENDPOINT) return false;
 
 	/*
@@ -164,7 +161,7 @@ void AquilaServices::add(char *name, bool (*function)(uint16_t reqAddr, uint8_t 
 void AquilaServices::request(uint16_t destAddr, uint8_t method, char *name, void (*callback)(uint16_t srcAddr, uint8_t status, char *data, uint8_t dataSize), char *data, uint8_t dataSize)
 {
 	// lose packet
-	if(nwkTxBusy || waitingResponse) return;
+	if(/*nwkTxBusy ||*/ waitingResponse) return;
 
 	// Form packetData
 	ServicePacket pkt;
@@ -183,17 +180,13 @@ void AquilaServices::request(uint16_t destAddr, uint8_t method, char *name, void
   	if(destAddr == BROADCAST) requestAck = 0;
   	else requestAck = NWK_OPT_ACK_REQUEST;
 
-	if(Mesh.getSecurityEnabled())
-		nwkPacket.options = NWK_OPT_ENABLE_SECURITY | requestAck;
-	else
-		nwkPacket.options = requestAck;
-
+  	nwkPacket.options = requestAck;
 	nwkPacket.data = (uint8_t*)&pkt;
 	nwkPacket.size = pkt.nameSize + pkt.dataSize + 4;
 	nwkPacket.confirm = nwkTxCb;
-	NWK_DataReq(&nwkPacket);
+	Mesh.sendPacket(&nwkPacket);
 
-	nwkTxBusy = true;
+	//nwkTxBusy = true;
 
 	// Wait for response and call callback...
 	// will be called on rxHandler
@@ -205,7 +198,7 @@ void AquilaServices::request(uint16_t destAddr, uint8_t method, char *name, void
 void AquilaServices::response(uint16_t destAddr, uint8_t method, char *data, uint8_t dataSize)
 {
 	// lose packet
-	if(nwkTxBusy) return;
+	//if(nwkTxBusy) return;
 
 	// Form packetData
 	ServicePacket pkt;
@@ -223,17 +216,13 @@ void AquilaServices::response(uint16_t destAddr, uint8_t method, char *data, uin
   	if(destAddr == BROADCAST) requestAck = 0;
   	else requestAck = NWK_OPT_ACK_REQUEST;
 
-	if(Mesh.getSecurityEnabled())
-		nwkPacket.options = NWK_OPT_ENABLE_SECURITY | requestAck;
-	else
-		nwkPacket.options = requestAck;
-	
+  	nwkPacket.options = requestAck;
 	nwkPacket.data = (uint8_t*)&pkt;
 	nwkPacket.size = dataSize + 4;
 	nwkPacket.confirm = nwkTxCb;
-	NWK_DataReq(&nwkPacket);
+	Mesh.sendPacket(&nwkPacket);
 
-	nwkTxBusy = true;
+	//nwkTxBusy = true;
 }
 
 AquilaServices Services;

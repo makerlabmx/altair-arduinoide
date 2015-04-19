@@ -46,6 +46,7 @@
 #include <stdbool.h>
 #include "lwm/sys/sys.h"
 #include "lwm/nwk/nwk.h"
+#include "MeshControl.h"
 
 #define BROADCAST 0xFFFF
 #define HUB 0x00FF
@@ -65,6 +66,8 @@ class AquilaMesh
 {
 private:
 	bool isAsleep;
+	MeshControl meshControl;
+
 public:
 	AquilaMesh();
 	bool begin();
@@ -85,6 +88,7 @@ public:
 	bool sendPacket(TxPacket *packet);
 	void sendNow();
 
+	void sendEUI(uint16_t dest);
 	void announce(uint16_t dest);
 
 	uint16_t getShortAddr();

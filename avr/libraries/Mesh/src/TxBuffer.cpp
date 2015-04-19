@@ -44,11 +44,11 @@
 void TxBufPacket_init(TxBufPacket* bufPacket, TxPacket* packet)
 {
 	// Copy the data of the packet to the bufPacket
-	memcpy(bufPacket->data, packet->data, sizeof(packet->data));
+	memcpy(bufPacket->data, packet->data, packet->size);
 	// Copy the packet inside bufPacket
-	bufPacket->packet = *packet;
+	memcpy(&bufPacket->packet, packet, sizeof(TxPacket));
 	// Update data pointer of packet
-	bufPacket->packet.data = bufPacket->data;
+	//bufPacket->packet.data = bufPacket->data;
 }
 
 
@@ -69,7 +69,7 @@ bool TxBuffer_isFull(TxBuffer* buffer)
 	{
 		count = buffer->count;
 	}
-	return count == MESHTXBUFFER_SIZE;
+	return count >= MESHTXBUFFER_SIZE;
 }
 
 bool TxBuffer_isEmpty(TxBuffer* buffer)
@@ -82,9 +82,9 @@ bool TxBuffer_isEmpty(TxBuffer* buffer)
 	return count == 0;
 }
 
-void TxBuffer_insert(TxBuffer* buffer, TxBufPacket* data)
+bool TxBuffer_insert(TxBuffer* buffer, TxBufPacket* data)
 {
-
+	if(TxBuffer_isFull(buffer)) return false;
 	memcpy(buffer->head, data, sizeof(TxBufPacket));
 
 	if (++buffer->head == &buffer->buffer[MESHTXBUFFER_SIZE])
@@ -96,11 +96,16 @@ void TxBuffer_insert(TxBuffer* buffer, TxBufPacket* data)
 	{
 		buffer->count++;
 	}
+	return true;
 }
 
-void TxBuffer_remove(TxBuffer* buffer, TxBufPacket* data)
+bool TxBuffer_remove(TxBuffer* buffer, TxBufPacket* data)
 {
+	if(TxBuffer_isEmpty(buffer)) return false;
+
 	memcpy(data, buffer->tail, sizeof(TxBufPacket));
+
+	//data->packet.data = data->data;
 
 	if (++buffer->tail == &buffer->buffer[MESHTXBUFFER_SIZE])
 	{
@@ -112,4 +117,6 @@ void TxBuffer_remove(TxBuffer* buffer, TxBufPacket* data)
 	{
 		buffer->count--;
 	}
+	return true;
+
 }
