@@ -49,6 +49,7 @@
 #include "stack/halID.h"
 #include "Mesh.h"
 #include "TxBuffer.h"
+#include "RxBuffer.h"
 
 /////
 
@@ -71,39 +72,44 @@ void txConfirm(TxPacket *packet)
 }
 
 // Reception management
-// TODO: use buffer
-static RxPacket rxPendPacket;
-static uint8_t rxPendingData[AQUILAMESH_MAXPAYLOAD];
-static bool rxPending = false;
-
+static RxBuffer rxBuffer;
 bool (*rxCallbacks[16])(RxPacket *ind);
 
-bool rxBootstrap(RxPacket *ind)
+static bool rxBootstrap(RxPacket *ind)
 {
-	if(rxPending) return false;
+	// Send rssi with Ack
+	NWK_SetAckControl(abs(ind->rssi));
+
+	if(RxBuffer_isFull(&rxBuffer)) { return false; }
+
 	// Enforce security
 	// if security enabled and the package was not secured, ignore it.
-	if( secEnabled && !(ind->options & NWK_IND_OPT_SECURED) ) return false;
+	if( secEnabled && !(ind->options & NWK_IND_OPT_SECURED) ) { return false; }
 
-	rxPendPacket = *ind;
-	memcpy(rxPendingData, ind->data, ind->size);
-	rxPendPacket.data = rxPendingData;
-	rxPending = true;
-	// Send Ack imediately
-	// TODO: consider configuring Ack for sending rssi
+	RxBufPacket bufPacket;
+	RxBufPacket_init(&bufPacket, ind);
+
+	if(!RxBuffer_insert(&rxBuffer, &bufPacket)) { return false; }
+
+	// Send Ack immediately
 	return true;
 }
 
 void rxAttendPend()
 {
 	// If ack pending (busy), dont attend yet.
-	if(!rxPending || NWK_Busy()) return;
+	if(RxBuffer_isEmpty(&rxBuffer) || NWK_Busy()) return;
 
-	if(rxCallbacks[rxPendPacket.dstEndpoint] != NULL)
+	// Get package from buffer
+	static RxBufPacket bufPacket;
+	if(!RxBuffer_remove(&rxBuffer, &bufPacket)) { return; }
+
+	bufPacket.packet.data = bufPacket.data;
+
+	if(rxCallbacks[bufPacket.packet.dstEndpoint] != NULL)
 	{
-		rxCallbacks[rxPendPacket.dstEndpoint](&rxPendPacket);
+		rxCallbacks[bufPacket.packet.dstEndpoint](&(bufPacket.packet));
 	}
-	rxPending = false;
 }
 
 /////
@@ -116,6 +122,7 @@ AquilaMesh::AquilaMesh()
 	isAsleep = false;
 	shortAddr = 0;
 	TxBuffer_init(&txBuffer);
+	RxBuffer_init(&rxBuffer);
 	txUserConfirm = NULL;
 	txBusy = false;
 
