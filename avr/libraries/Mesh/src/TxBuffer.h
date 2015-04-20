@@ -50,7 +50,9 @@
 #include <Mesh.h>
 #include "lwm/nwk/nwk.h"
 
+#ifndef MESHTXBUFFER_SIZE
 #define MESHTXBUFFER_SIZE 8
+#endif
 
 // We have to define data appart because in TxPacket, data is a pointer, and we need storage space.
 // When creating TxPacket, we should first copy data contents, then copy the packet and redefine its 

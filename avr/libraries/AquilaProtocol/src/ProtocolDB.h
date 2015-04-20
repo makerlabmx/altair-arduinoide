@@ -44,7 +44,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "halPersist.h"
+#include "stack/halPersist.h"
 
 #ifndef PROTOCOL_PERSIST_SIZE
 #define PROTOCOL_PERSIST_SIZE 1024

@@ -47,7 +47,7 @@
 #include "lwm/sys/sys.h"
 #include "lwm/nwk/nwk.h"
 #include "stack/config.h"
-#include "stack/ProtocolDB.h"
+#include "ProtocolDB.h"
 #include "stack/halID.h"
 
 #define PROTOCOL_ENDPOINT 13

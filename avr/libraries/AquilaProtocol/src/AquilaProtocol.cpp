@@ -45,7 +45,7 @@
 #include "AquilaProtocol.h"
 
 static RxPacket receivedPacket;
-static uint8_t receivedData[MAX_DATA_SIZE];
+static uint8_t receivedData[AQUILAMESH_MAXPAYLOAD];
 static uint8_t flagGotPacket;
 
 static bool Protocol__rxHandler(RxPacket *ind)
@@ -72,7 +72,7 @@ void AquilaProtocol::send(uint16_t address, char *command, uint8_t size)
 {
 	uint8_t requestAck = 0;
 
-	char data[MAX_DATA_SIZE];
+	char data[AQUILAMESH_MAXPAYLOAD];
 	data[0] = PROTOCOL_VERSION;		//appends protocol version as first byte
 	memcpy(&data[1], command, size);
 
@@ -283,7 +283,7 @@ void AquilaProtocol::sendId(uint16_t address)
 {
 	uint8_t idLen = strlen(this->id);
 
-	char packet[MAX_DATA_SIZE];
+	char packet[AQUILAMESH_MAXPAYLOAD];
 	//control byte:
 	packet[0] = PROTOCOL_POST<<PROTOCOL_COMMAND_TYPE | 0<<PROTOCOL_HAS_PARAM | 1<<PROTOCOL_HAS_DATA;
 	//command byte:
@@ -298,7 +298,7 @@ void AquilaProtocol::sendName(uint16_t address)
 {
 	uint8_t nameLen = strlen(this->name);
 
-	char packet[MAX_DATA_SIZE];
+	char packet[AQUILAMESH_MAXPAYLOAD];
 	//control byte:
 	packet[0] = PROTOCOL_POST<<PROTOCOL_COMMAND_TYPE | 0<<PROTOCOL_HAS_PARAM | 1<<PROTOCOL_HAS_DATA;
 	//command byte:
@@ -413,7 +413,7 @@ void AquilaProtocol::sendAction(uint8_t n, uint16_t address)
 				if(cont == n)
 				{
 
-					char packet[MAX_DATA_SIZE];
+					char packet[AQUILAMESH_MAXPAYLOAD];
 					//control byte:
 					packet[0] = PROTOCOL_POST<<PROTOCOL_COMMAND_TYPE | 1<<PROTOCOL_HAS_PARAM | 1<<PROTOCOL_HAS_DATA;
 					//command byte:
@@ -446,7 +446,7 @@ void AquilaProtocol::sendEvent(uint8_t n, uint16_t address)
 			{
 				if(cont == n)
 				{
-					char packet[MAX_DATA_SIZE];
+					char packet[AQUILAMESH_MAXPAYLOAD];
 					//control byte:
 					packet[0] = PROTOCOL_POST<<PROTOCOL_COMMAND_TYPE | 1<<PROTOCOL_HAS_PARAM | 1<<PROTOCOL_HAS_DATA;
 					//command byte:

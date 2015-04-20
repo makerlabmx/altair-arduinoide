@@ -50,7 +50,9 @@
 #include <Mesh.h>
 #include "lwm/nwk/nwk.h"
 
+#ifndef MESHRXBUFFER_SIZE
 #define MESHRXBUFFER_SIZE 4
+#endif
 
 // We have to define data appart because in RxPacket, data is a pointer, and we need storage space.
 // When creating RxPacket, we should first copy data contents, then copy the packet and redefine its 
