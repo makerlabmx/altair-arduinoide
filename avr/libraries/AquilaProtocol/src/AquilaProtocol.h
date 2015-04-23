@@ -64,6 +64,10 @@
 #define PROTOCOL_MAXEVENTS 100
 #endif
 
+#ifndef PROTOCOL_MAXONSUBS
+#define PROTOCOL_MAXONSUBS 10
+#endif
+
 //Control byte indexes:
 #define PROTOCOL_COMMAND_TYPE 0
 #define PROTOCOL_HAS_PARAM 3
@@ -103,6 +107,13 @@ typedef struct
 
 #define Event uint8_t
 
+typedef struct 
+{
+	char *eName;
+	uint8_t EUIAddress[PROTOCOL_EUIADDRESSLEN];
+	bool (*function)(uint8_t param, bool gotParam);
+} OnSubscription;
+
 class AquilaProtocol
 {
 private:
@@ -112,8 +123,10 @@ private:
 
 	uint8_t nActions;
 	uint8_t nEvents;
+	uint8_t nOnSubs;
  	Action *actions[PROTOCOL_MAXACTIONS];
  	char *events[PROTOCOL_MAXEVENTS];
+ 	OnSubscription *onSubs[PROTOCOL_MAXONSUBS];
 
  	void send(uint16_t address, char *command, uint8_t size);
 
@@ -135,7 +148,8 @@ private:
 	void setEntry(uint8_t nEntry, Entry *entry, uint16_t address);
 	void sendAction(uint8_t n, uint16_t address);
 	void sendEvent(uint8_t n, uint16_t address);
-	void checkEvent(uint8_t *EUIAddress, uint8_t event, uint8_t param, uint8_t hasParam);
+	void checkLocalEvent(uint8_t *EUIAddress, uint8_t event, uint8_t param, uint8_t hasParam, uint8_t* eName);
+	void checkEvent(uint8_t *EUIAddress, uint8_t event, uint8_t param, uint8_t hasParam, uint8_t* eName);
 	bool EUIAddressEquals(uint8_t *addr1, uint8_t *addr2);
 
 public:
@@ -159,6 +173,13 @@ public:
 	Event addEvent(char description[]);
 
 	void emit(uint8_t event, uint8_t param=0, bool hasParam=false);
+
+	// Emit to a specific address, for special implementations
+	void emit(uint16_t dest, uint8_t event, uint8_t param=0, bool hasParam=false);
+
+	bool on(char* eventName, bool (*function)(uint8_t param, bool gotParam));
+	
+	bool on(char* eventName, uint8_t* EUIAddress, bool (*function)(uint8_t param, bool gotParam));
 
 	/*
 		Advanced functions:

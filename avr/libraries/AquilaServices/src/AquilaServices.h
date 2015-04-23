@@ -69,6 +69,8 @@
 #include <Mesh.h>
 
 #define AQUILASERVICES_MAX 20
+#define AQUILASERVICES_VAR_MAX 10
+#define AQUILASERVICES_FUNC_MAX 10
 #define AQUILASERVICES_ENDPOINT 12
 #define AQUILASERVICES_VERSION 1
 
@@ -104,19 +106,57 @@ typedef struct
 	bool (*function)(uint16_t reqAddr, uint8_t method, char *data, uint8_t dataSize);
 } Service;
 
+typedef struct 
+{
+	char *name;
+	int *var;
+} IntVariableService;
+
+typedef struct 
+{
+	char *name;
+	float *var;
+} FloatVariableService;
+
+typedef struct
+{
+	char *name;
+	float (*function)(uint8_t method, char *data, uint8_t dataSize);
+} FunctionService;
+
 class AquilaServices
 {
-private:
-
 public:
+	Service services[AQUILASERVICES_MAX];
+	IntVariableService intVars[AQUILASERVICES_VAR_MAX];
+	FloatVariableService floatVars[AQUILASERVICES_VAR_MAX];
+	FunctionService funcServices[AQUILASERVICES_FUNC_MAX];
+
+	void (*lastReqCb)(uint16_t srcAddr, uint8_t status, char *data, uint8_t dataSize);
+	bool waitingResponse;
+	double lastRequestTime;
+
+	bool varResponse(uint16_t reqAddr, int var);
+	bool varResponse(uint16_t reqAddr, float var);
+
 	AquilaServices();
 	void begin();
 	void loop();
-	// Inscribe un servicio a name
+
+	// SIMPLE API:
+	// Create a service that is tied to a variable
+	void variable(char *name, int *var);
+	void variable(char *name, float *var);
+
+	// Create a service that is tied to a function
+	void function(char *name, float (*func)(uint8_t method, char *data, uint8_t dataSize));
+
+	// ADVANCED API:
+	// Subscribes a service whith a name
 	void add(char *name, bool (*function)(uint16_t reqAddr, uint8_t method, char *data, uint8_t dataSize));
-	// Petición
+	// Request
 	void request(uint16_t destAddr, uint8_t method, char *name, void (*callback)(uint16_t srcAddr, uint8_t status, char *data, uint8_t dataSize), char *data = NULL, uint8_t dataSize = 0);
-	// Para usar dentro del servicio
+	// For use inside the service function
 	void response(uint16_t destAddr, uint8_t method, char *data = NULL, uint8_t dataSize = 0);
 };
 
