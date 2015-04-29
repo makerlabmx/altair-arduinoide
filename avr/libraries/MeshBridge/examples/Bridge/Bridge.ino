@@ -14,26 +14,23 @@
 */
 
 /*
- *	Update 26/08/14: added command TX buffer and packet RX ring buffer
- *	Update 26/08/14: started implementing 16 bit CRC based on Xmodem: http://www.gaw.ru/pdf/Atmel/app/avr/AVR350.pdf (Not yet active)
- *	Serial Bridge Protocol: [PREAMBLE] COMMAND [Command specific] ([16 bit CRC] not yet activated)
- *		[PREAMBLE]: 0xAA 0x55 0xAA 0x55
+ *	Update: 24/04/15: Changed encapsulation protocol to SLIP (RFC 1055)(http://en.wikipedia.org/wiki/Serial_Line_Internet_Protocol),
+ *					  added 16bit CRC to end of packet
+ *
+ * 	Serial packet: [SLIP END (0xC0)][DATA (SLIP Escaped)][SLIP END (0xC0)]
+ * 	DATA packet: [Command][Command specific][CRC (16bit)]
  *
  *	Comands:
  *		CMD_DATA: 			[Command specific] = lqi rssi srcAddr(16) dstAddr(16) srcEndpoint dstEndpoint frameSize [MAC Frame]
- *		CMD_SET_PROM:		[Command specific] = PROM*				*0 or 1
- *		CMD_SET_PAN:		[Command specific] = [PAN*]				*len = 2 (16 bit), lsb first
- *		CMD_SET_CHAN:		[Command specific] = CHAN*				*11 - 24
+ *		CMD_ACK:			[Command specific] = RSSI												*Sent on data transmit success
+ *		CMD_NACK:			[Command specific] = CAUSE												*Sent on data tranmit error
+ *		CMD_GET_OPT:		[Command specific] = PROM* PAN_LOW PAN_HIGH CHAN**	ADDR_LOW ADDR_HIGH	*Returns the current options
+ *		CMD_SET_OPT:		[Command specific] = PROM* PAN_LOW PAN_HIGH CHAN**	ADDR_LOW ADDR_HIGH	*0 or 1, **11-26
+ *		CMD_GET_SECURITY:	[Command specific] = ENABLED											*Get if security enabled
+ *		CMD_SET_SECURITY: 	[Command specific] = ENABLED [SEC_KEY](16 byte, 128 bit)				*Set if security enabled and key
  *		CMD_START																					*Sent on bridge start or reset and in response to CMD_PING
- *		CMD_SET_SHORT_ADDR:	[Command specific] = [ADDR*]	*len = 2 (16 bit), lsb first
- *		//CMD_SET_LONG_ADDR:	[Command specific] = [ADDR*]*len = 8 (64 bit), lsb first
  *		CMD_PING:																					*Sent by PC, response is CMD_START
- *		CMD_SUCESS:																				*Sent on data transmit success
- *		CMD_ERROR:																				*Sent on data tranmit error
- *		CMD_GET_LONG_ADDR:																*Get bridge MAC address
- *		CMD_GET_SECURITY:																	*Get if security enabled
- *		CMD_SET_SECURITY: [Command specific] = ENABLED*		*0 or 1
- *		CMD_SET_KEY:			[Command specific] = [SEC_KEY*]	*len = 16 (128 bit), automatically enables security and responds with security enabled
+ *		CMD_GET_LONG_ADDR:																			*Get bridge MAC address
  */
 
 /*
@@ -43,7 +40,7 @@
  *		|					|
  *
  *	PC 	| CMD_DATA	------------------> | Bridge
- *		| <-- CMD_SUCCESS or CMD_ERROR	|
+ *		| <-- CMD_ACK or CMD_NACK		|
  *		|								|
  *
  *	PC 	| CMD_SET_*	------------------> | Bridge
@@ -64,6 +61,7 @@
 #define CHANNEL 0X1A
 #define PAN 0xCA5A
 #define PROMISCUOUS false
+#define BAUDRATE 57600
 
 #define ERROR_LED 13
 
@@ -81,10 +79,10 @@ void fatalError()
 
 void setup()
 {
-	if(!Bridge_init(ADDRESS, CHANNEL, PAN, PROMISCUOUS)) fatalError();
+	if(!Bridge.begin(BAUDRATE, ADDRESS, CHANNEL, PAN, PROMISCUOUS)) fatalError();
 }
 
 void loop()
 {
-	Bridge_loop();
+	Bridge.loop();
 }

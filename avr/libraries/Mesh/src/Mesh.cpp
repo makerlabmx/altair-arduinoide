@@ -51,11 +51,13 @@
 #include "TxBuffer.h"
 #include "RxBuffer.h"
 
+#include "lwm/phy/atmegarfr2.h"
+
 /////
 
 static bool secEnabled;
 static uint8_t euiAddr[8];
-static uint16_t shortAddr;
+uint16_t shortAddr;
 
 // Transmission management
 static TxBuffer txBuffer;

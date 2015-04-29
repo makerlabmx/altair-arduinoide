@@ -3,7 +3,7 @@
 *
 * \brief Aquila Mesh USB Bridge firmware.
 *
-* Copyright (C) 2014, Rodrigo Méndez. All rights reserved.
+* Copyright (C) 2015, Rodrigo Méndez. All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
 * modification, are permitted provided that the following conditions are met:
@@ -38,77 +38,62 @@
 *
 */
 
+#ifndef AQUILABRIDGE_H
+#define AQUILABRIDGE_H
 
-#ifndef AQUILABRIDGEARDUINO_H
-#define AQUILABRIDGEARDUINO_H
-
-#include "stack/halID.h"
-#include "stack/halSerial.h"
+#include <Arduino.h>
 #include <Mesh.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include "Slip.h"
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
+//#define BRIDGE_DEBUG
 
 #define TIMEOUT 20
 #define MAX_FRAME_SIZE 128
 
-#define CMD_DATA 0
-#define CMD_SET_PROM 1
-#define CMD_SET_PAN 2
-#define CMD_SET_CHAN 3
-#define CMD_START 4
-#define CMD_SET_SHORT_ADDR 5
-#define CMD_SET_LONG_ADDR 6
-#define CMD_PING 7
-#define CMD_SUCCESS 8
-#define CMD_ERROR 9
-#define CMD_GET_LONG_ADDR 10
-#define CMD_GET_SECURITY 11
-#define CMD_SET_SECURITY 12
-#define CMD_SET_KEY 13
+#define CMD_DATA 			0
+#define CMD_ACK 			1
+#define CMD_NACK 			2
+#define CMD_GET_OPT 		3
+#define CMD_SET_OPT 		4
+#define CMD_GET_SECURITY 	5
+#define CMD_SET_SECURITY 	6
+#define CMD_START 			7
+#define CMD_PING 			8
+#define CMD_GET_LONG_ADDR 	9
+#define CMD_SET_LONG_ADDR 	10
 
-bool getChTimeOut(uint8_t *c, long timeOut);
+class AquilaBridge
+{
+private:
+	Slip slip;
+	bool isProm;
+	uint16_t pan;
+	uint8_t channel;
+	uint8_t euiAddress[16];
+public:
+	AquilaBridge();
+	bool begin(unsigned int baudrate, uint16_t addr, uint8_t channel, uint16_t pan, bool promiscuous);
 
-void sendPreamble();
+	void setChannel(uint8_t chan);
+	void setPan(uint16_t _pan);
 
-void sendStart();
+	void loop();
 
-void sendSuccess();
+	void sendComBuffer(uint8_t size);
 
-void sendError();
+	void sendAck(uint8_t rssi);
+	void sendNack(uint8_t cause);
+	void sendOpt();
+	void sendSecurity();
+	void sendStart();
+	void sendLongAddr(uint8_t addr[]);
 
-void sendProm(bool isProm);
+	void parseCommand(char *data, uint8_t size);
 
-void sendPan(uint16_t pan);
+	void txSend(uint16_t dstAddr, uint8_t srcEndpoint, uint8_t dstEndpoint, uint8_t size, uint8_t *data);
 
-void sendChan(uint8_t chan);
+};
 
-void sendShortAddr(uint16_t addr);
+extern AquilaBridge Bridge;
 
-void sendLongAddr(uint8_t addr[]);
-
-void txCb(uint8_t status);
-
-void txSend(uint16_t dstAddr, uint8_t srcEndpoint, uint8_t dstEndpoint, uint8_t size, uint8_t *data);
-
-void txSendNow();
-
-// Called on rx success, gets rx data
-void rxHandler(PHY_DataInd_t *ind);
-
-bool serialHandler();
-
-bool Bridge_init(uint16_t addr, uint8_t channel, uint16_t pan, bool promiscuous);
-
-void Bridge_loop();
-
-// #define DEBUG
-
-#ifdef  __cplusplus
-}
-#endif
-
-#endif //AQUILABRIDGEARDUINO_H
+#endif //AQUILABRIDGE_H
