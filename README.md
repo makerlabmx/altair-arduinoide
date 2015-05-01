@@ -7,14 +7,14 @@ Contents/Contenido:
 ### English:
 # Altair Hardware Definition and Libraries for the Arduino IDE
 
-**Note: ** This version is only compatible with Hub (aquila-server) version 0.1.10 or newer.
+**Note: ** This version is only compatible with Hub (aquila-server) version 0.2.0 or newer.
 
 ## Installation:
 
-Install Arduino IDE version 1.5.8 or newer for your OS:
-- Windows: [Installer](http://arduino.cc/download_handler.php?f=/arduino-1.6.1-windows.exe)
-- Mac OSX: [OSX 10.7 or greater](http://arduino.cc/download_handler.php?f=/arduino-1.6.1-macosx.zip)
-- Linux: [32 bit](http://arduino.cc/download_handler.php?f=/arduino-1.6.1-linux32.tar.xz), [64 bit](http://arduino.cc/download_handler.php?f=/arduino-1.6.1-linux64.tar.xz)
+Install Arduino IDE version 1.6.3 or newer for your OS:
+- Windows: [Installer](http://arduino.cc/download_handler.php?f=/arduino-1.6.3-windows.exe)
+- Mac OSX: [OSX 10.7 or greater](http://arduino.cc/download_handler.php?f=/arduino-1.6.3-macosx.zip)
+- Linux: [32 bit](http://arduino.cc/download_handler.php?f=/arduino-1.6.3-linux32.tar.xz), [64 bit](http://arduino.cc/download_handler.php?f=/arduino-1.6.3-linux64.tar.xz)
 
 Install the USB drivers:
 - Windows and OSX: [FTDI Drivers](http://www.ftdichip.com/Drivers/VCP.htm)
@@ -44,14 +44,14 @@ git clone https://github.com/makerlabmx/altair-arduinoide.git altair
 ### Spanish:
 # Bibliotecas y definición de hardware de Altair para el IDE de Arduino
 
-**Nota: ** Esta versión es únicamente compatible con versiones 0.1.10 o superior del hub (aquila-server).
+**Nota: ** Esta versión es únicamente compatible con versiones 0.2.0 o superior del hub (aquila-server).
 
 ## Instalación:
 
-Instala el IDE de Arduino versión 1.5.8 o superior para tu sistema operativo:
-- Windows: [Instalador](http://arduino.cc/download_handler.php?f=/arduino-1.6.1-windows.exe)
-- Mac OSX: [OSX 10.7 o superior](http://arduino.cc/download_handler.php?f=/arduino-1.6.1-macosx.zip)
-- Linux: [32 bit](http://arduino.cc/download_handler.php?f=/arduino-1.6.1-linux32.tar.xz), [64 bit](http://arduino.cc/download_handler.php?f=/arduino-1.6.1-linux64.tar.xz)
+Instala el IDE de Arduino versión 1.6.3 o superior para tu sistema operativo:
+- Windows: [Instalador](http://arduino.cc/download_handler.php?f=/arduino-1.6.3-windows.exe)
+- Mac OSX: [OSX 10.7 o superior](http://arduino.cc/download_handler.php?f=/arduino-1.6.3-macosx.zip)
+- Linux: [32 bit](http://arduino.cc/download_handler.php?f=/arduino-1.6.3-linux32.tar.xz), [64 bit](http://arduino.cc/download_handler.php?f=/arduino-1.6.3-linux64.tar.xz)
 
 Instala los drivers USB:
 - Windows y OSX: [FTDI Drivers](http://www.ftdichip.com/Drivers/VCP.htm)
