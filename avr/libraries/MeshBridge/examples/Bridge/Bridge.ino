@@ -2,6 +2,8 @@
 #include <Mesh.h>
 #include "AquilaBridge.h"
 
+// Version 0.3.0, Please note that this version is only compatible with Aquila Server 0.2.0 or newer
+
 /*
 	MeshBridge
 	This is the Firmware for the Altair that will act as a bridge interface between the Mesh network and the
