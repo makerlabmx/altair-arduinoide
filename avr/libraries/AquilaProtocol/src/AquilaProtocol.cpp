@@ -248,7 +248,7 @@ void AquilaProtocol::parsePacket()
 
 			}
 
-			checkEvent(rxEUIAddress, command, param, hasParam, (uint8_t*)eName);
+			checkEvent(rxEUIAddress, command, param, hasParam, (uint8_t*)eName, sAddr);
 			return;
 			break;
 
@@ -489,7 +489,7 @@ void AquilaProtocol::sendEvent(uint8_t n, uint16_t address)
 }
 
 // Check events subscribed in code (runtime)
-void AquilaProtocol::checkLocalEvent(uint8_t *EUIAddress, uint8_t event, uint8_t param, uint8_t hasParam, uint8_t* eName)
+void AquilaProtocol::checkLocalEvent(uint8_t *EUIAddress, uint8_t event, uint8_t param, uint8_t hasParam, uint8_t* eName, uint16_t shortAddress)
 {
 	for(int i = 0; i < this->nOnSubs; i++)
 	{
@@ -498,20 +498,26 @@ void AquilaProtocol::checkLocalEvent(uint8_t *EUIAddress, uint8_t event, uint8_t
 		{
 			if(EUIAddressEquals(this->onSubs[i]->EUIAddress, euiBroadcast))
 			{
-				this->onSubs[i]->function(param, hasParam);
+				if(this->onSubs[i]->function != NULL)
+					this->onSubs[i]->function(param, hasParam);
+				else if(this->onSubs[i]->extFunction != NULL)
+					this->onSubs[i]->extFunction(param, hasParam, shortAddress, EUIAddress);
 			}
 			else if(EUIAddressEquals(this->onSubs[i]->EUIAddress, EUIAddress))
 			{
-				this->onSubs[i]->function(param, hasParam);
+				if(this->onSubs[i]->function != NULL)
+					this->onSubs[i]->function(param, hasParam);
+				else if(this->onSubs[i]->extFunction != NULL)
+					this->onSubs[i]->extFunction(param, hasParam, shortAddress, EUIAddress);
 			}
 		}
 	}
 }
 
 // Check events subscribed in EEPROM (configured from the hub)
-void AquilaProtocol::checkEvent(uint8_t *EUIAddress, uint8_t event, uint8_t param, uint8_t hasParam, uint8_t* eName)
+void AquilaProtocol::checkEvent(uint8_t *EUIAddress, uint8_t event, uint8_t param, uint8_t hasParam, uint8_t* eName, uint16_t shortAddress)
 {
-	checkLocalEvent(EUIAddress, event, param, hasParam, eName);
+	checkLocalEvent(EUIAddress, event, param, hasParam, eName, shortAddress);
 
 	DBHeader header;
 	Entry entry;
@@ -682,13 +688,33 @@ void AquilaProtocol::emit(uint16_t dest, uint8_t event, uint8_t param, bool hasP
 	// Send event to dest (Almost constant time)
 	send(dest, packet, index + descLen);
 	// Check if we are subscribed to our own event (slows down with more entries)
-	checkEvent(this->EUIAddress, event, param, hasParam, (uint8_t*)this->events[event]);
+	checkEvent(this->EUIAddress, event, param, hasParam, (uint8_t*)this->events[event], Mesh.getShortAddr());
 }
 
 bool AquilaProtocol::on(char* eventName, bool (*function)(uint8_t param, bool gotParam))
 {
 	// NULL means accept from any
 	this->on(eventName, euiBroadcast, function);
+}
+
+bool AquilaProtocol::on(char* eventName, bool (*function)(uint8_t param, bool gotParam, uint16_t shortAddr, uint8_t *longAddr))
+{
+	// Extended on subscriptions
+	if(this->nOnSubs >= PROTOCOL_MAXONSUBS) return false;
+	
+	uint8_t index = this->nOnSubs;
+
+	OnSubscription *newOnSub;
+	newOnSub = (OnSubscription*)malloc(sizeof(OnSubscription));
+	uint8_t size = strlen((char*)eventName);
+	newOnSub->eName = (char*)malloc(size + 1);
+	strcpy((char*)newOnSub->eName, (char*)eventName);
+	memcpy(newOnSub->EUIAddress, euiBroadcast, PROTOCOL_EUIADDRESSLEN);
+	newOnSub->function = NULL;
+	newOnSub->extFunction = function;
+	this->onSubs[index] = newOnSub;
+	this->nOnSubs++;
+	return true;
 }
 	
 bool AquilaProtocol::on(char* eventName, uint8_t* EUIAddress, bool (*function)(uint8_t param, bool gotParam))
@@ -704,6 +730,7 @@ bool AquilaProtocol::on(char* eventName, uint8_t* EUIAddress, bool (*function)(u
 	strcpy((char*)newOnSub->eName, (char*)eventName);
 	memcpy(newOnSub->EUIAddress, EUIAddress, PROTOCOL_EUIADDRESSLEN);
 	newOnSub->function = function;
+	newOnSub->extFunction = NULL;
 	this->onSubs[index] = newOnSub;
 	this->nOnSubs++;
 	return true;

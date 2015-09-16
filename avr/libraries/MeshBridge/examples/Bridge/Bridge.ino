@@ -58,6 +58,7 @@
  *		|					|
  *
  */
+#include <avr/wdt.h>  
 
 #define ADDRESS 0x00FF
 #define CHANNEL 0X1A
@@ -81,10 +82,18 @@ void fatalError()
 
 void setup()
 {
+	wdt_disable();
+	wdt_reset();
+	// Check reset source
+	Serial1.begin(9600);
+	Serial1.println("reset");
+	Serial1.println(MCUSR, HEX);
 	if(!Bridge.begin(BAUDRATE, ADDRESS, CHANNEL, PAN, PROMISCUOUS)) fatalError();
+	wdt_enable(WDTO_1S);
 }
 
 void loop()
 {
+	wdt_reset();
 	Bridge.loop();
 }

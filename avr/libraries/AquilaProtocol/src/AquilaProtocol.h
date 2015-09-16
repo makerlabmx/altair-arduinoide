@@ -112,6 +112,7 @@ typedef struct
 	char *eName;
 	uint8_t EUIAddress[PROTOCOL_EUIADDRESSLEN];
 	bool (*function)(uint8_t param, bool gotParam);
+	bool (*extFunction)(uint8_t param, bool gotParam, uint16_t shortAddr, uint8_t *longAddr);
 } OnSubscription;
 
 class AquilaProtocol
@@ -148,8 +149,8 @@ private:
 	void setEntry(uint8_t nEntry, Entry *entry, uint16_t address);
 	void sendAction(uint8_t n, uint16_t address);
 	void sendEvent(uint8_t n, uint16_t address);
-	void checkLocalEvent(uint8_t *EUIAddress, uint8_t event, uint8_t param, uint8_t hasParam, uint8_t* eName);
-	void checkEvent(uint8_t *EUIAddress, uint8_t event, uint8_t param, uint8_t hasParam, uint8_t* eName);
+	void checkLocalEvent(uint8_t *EUIAddress, uint8_t event, uint8_t param, uint8_t hasParam, uint8_t* eName, uint16_t shortAddress);
+	void checkEvent(uint8_t *EUIAddress, uint8_t event, uint8_t param, uint8_t hasParam, uint8_t* eName, uint16_t shortAddress);
 	bool EUIAddressEquals(uint8_t *addr1, uint8_t *addr2);
 
 public:
@@ -178,6 +179,8 @@ public:
 	void emit(uint16_t dest, uint8_t event, uint8_t param=0, bool hasParam=false);
 
 	bool on(char* eventName, bool (*function)(uint8_t param, bool gotParam));
+
+	bool on(char* eventName, bool (*function)(uint8_t param, bool gotParam, uint16_t shortAddr, uint8_t *longAddr));
 	
 	bool on(char* eventName, uint8_t* EUIAddress, bool (*function)(uint8_t param, bool gotParam));
 
