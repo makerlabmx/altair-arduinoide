@@ -291,6 +291,7 @@ void AquilaServices::request(uint16_t destAddr, uint8_t method, char *name, void
 
 	//nwkTxBusy = true;
 
+	if(callback == NULL) return;
 	// Wait for response and call callback...
 	// will be called on rxHandler
 	lastReqCb = callback;
