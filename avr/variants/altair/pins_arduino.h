@@ -73,6 +73,8 @@
 #define digitalPinToPCMSKbit(p) (((p) == 8 ) ? 0 : \
                                  (((p) >= 9 && (p) <= 12) ? ((p) - 5) : (0)))
 
+#define digitalPinToInterrupt(p)  ( ((p) >= 0 && (p) <= 3) ? ((p) + 2) : ( ((p) == 14 || (p) == 15) ? ((p) - 14) : ( ((p) == 16 || (p) == 17) ? ((p) - 10) : NOT_AN_INTERRUPT ) ) )
+
 #ifdef ARDUINO_MAIN
 
 const uint16_t PROGMEM port_to_mode_PGM[] = {

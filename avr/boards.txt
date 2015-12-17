@@ -6,13 +6,13 @@ menu.cpu=Processor
 altair.name=Altair
 altair.cpu=atmega256rfr2
 
-altair.upload.tool=avrdude
+altair.upload.tool=arduino:avrdude
 altair.upload.protocol=wiring
 
-altair.bootloader.tool=avrdude
+altair.bootloader.tool=arduino:avrdude
 
 altair.build.f_cpu=16000000L
-altair.build.core=arduino
+altair.build.core=arduino:arduino
 altair.build.variant=altair
 altair.build.board=ALTAIR
 # Workaround for https://github.com/arduino/Arduino/pull/1695
