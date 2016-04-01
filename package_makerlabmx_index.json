@@ -1,0 +1,48 @@
+{
+  "packages": [
+    {
+      "name": "makerlab",
+      "maintainer": "Makerlab Ingeniería e Innovación SAPI de CV",
+      "websiteURL": "http://www.makerlab.mx/",
+      "email": "info@makerlab.mx",
+      help: {
+        online: "http://community.aquila.io"
+      },
+
+      "platforms": [
+          {
+            name: "Aquila Boards",
+            architecture: "avr",
+            version: "0.2.1",
+            category: "Aquila",
+            url: "http://makerlabmx.github.io/altair-arduinoide/boards/altair-0.2.1.tar.bz2",
+            archiveFileName: "altair-0.2.1.tar.bz2",
+            checksum: "SHA-256:4e72d4267d9a8d86874edcd021dc661854a5136c0eed947a6fe10366bc51e373",
+            size: "29455",
+            help: {
+              online: "http://community.aquila.io"
+            },
+            boards: [
+              {
+                name: "Altair"
+              }
+            ],
+            toolsDependencies: [
+              {
+                packager: "arduino",
+                name: "avr-gcc",
+                version: "4.8.1-arduino5"
+              },
+              {
+                packager: "arduino",
+                name: "avrdude",
+                version: "6.0.1-arduino5"
+              }
+            ]
+          },
+      ],
+
+      "tools": [],
+    }
+  ]
+}
