@@ -11,24 +11,15 @@ Contents/Contenido:
 
 ## Installation:
 
-Install Arduino IDE version 1.6.3 or newer for your OS:
-- Windows: [Installer](http://arduino.cc/download_handler.php?f=/arduino-1.6.3-windows.exe)
-- Mac OSX: [OSX 10.7 or greater](http://arduino.cc/download_handler.php?f=/arduino-1.6.3-macosx.zip)
-- Linux: [32 bit](http://arduino.cc/download_handler.php?f=/arduino-1.6.3-linux32.tar.xz), [64 bit](http://arduino.cc/download_handler.php?f=/arduino-1.6.3-linux64.tar.xz)
-
-Install the USB drivers:
-- Windows and OSX: [FTDI Drivers](http://www.ftdichip.com/Drivers/VCP.htm)
-- Linux: Should be already included in your Distros Kernel, if not, check the link above.
-
-Clone this repo inside the "hardware" folder inside your sketch folder as "altair".
-Alternatively, You can download the zip, uncompress it and manually copy it.
-(Create the folder if it doesn't exist)
-
-Example:
-```
-cd <path to your home folder>/Arduino/hardware/
-git clone https://github.com/makerlabmx/altair-arduinoide.git altair
-```
+- Install Arduino 1.6.8 from the [Arduino website](http://www.arduino.cc/en/main/software).
+- Start Arduino and open Preferences window.
+- Enter ``http://makerlabmx.github.io/altair-arduinoide/package_makerlabmx_index.json`` into Additional Board Manager URLs field. You can add multiple URLs, separating them with commas.
+- Open Boards Manager from Tools > Board menu and install Aquila Boards platform (and don't forget to select Altair board from Tools > Board menu after installation).
+- Install the USB drivers:
+  - Windows and OSX: 
+    - For FTDI-based USB-Serial (purple board): [FTDI Drivers](http://www.ftdichip.com/Drivers/VCP.htm)
+    - For CP120X-based USB-Serial (black board): [CP210x Drivers](https://www.silabs.com/products/mcu/Pages/USBtoUARTBridgeVCPDrivers.aspx)
+  - Linux: Should be already included in your Distros Kernel, if not, check the links above.
 
 ## Use:
 
@@ -39,6 +30,8 @@ git clone https://github.com/makerlabmx/altair-arduinoide.git altair
 - For an example on using the Aquila libraries, select File > Examples > AquilaProtocol > template
 - Upload the example with the arrow icon in the IDE
 
+The best place to ask questions related to this core is the Aquila community forum: http://community.aquila.io/.
+
 * * *
 
 ### Spanish:
@@ -48,24 +41,16 @@ git clone https://github.com/makerlabmx/altair-arduinoide.git altair
 
 ## Instalación:
 
-Instala el IDE de Arduino versión 1.6.3 o superior para tu sistema operativo:
-- Windows: [Instalador](http://arduino.cc/download_handler.php?f=/arduino-1.6.3-windows.exe)
-- Mac OSX: [OSX 10.7 o superior](http://arduino.cc/download_handler.php?f=/arduino-1.6.3-macosx.zip)
-- Linux: [32 bit](http://arduino.cc/download_handler.php?f=/arduino-1.6.3-linux32.tar.xz), [64 bit](http://arduino.cc/download_handler.php?f=/arduino-1.6.3-linux64.tar.xz)
+- Instala Arduino 1.6.8 desde el [sitio de Arduino](http://www.arduino.cc/en/main/software).
+- Inicia Arduino y abre la ventana de preferencias.
+- Introduce ``http://makerlabmx.github.io/altair-arduinoide/package_makerlabmx_index.json`` en el campo "Gestor de URLs adicionales de tarjetas". Puedes agregar múltiples URLs separándolas con comas.
+- Abre el Gestor de tarjetas desde el menú Herramientas > Placa e instala la plataforma "Aquila Boards" (no olvides seleccionar Altair desde el menú Herramientas > Placa después de instalarlo).
+- Instala los drivers USB:
+  - Windows y OSX:
+    - Para USB-Serial basados en FTDI (placa morada): [FTDI Drivers](http://www.ftdichip.com/Drivers/VCP.htm)
+    - Para USB-Serial basados en CP210X (placa negra): [CP210x Drivers](https://www.silabs.com/products/mcu/Pages/USBtoUARTBridgeVCPDrivers.aspx)
+  - Linux: Ya deben de estar incluidos en el kernel de tu distribución, si no es así, checa el link anterior.
 
-Instala los drivers USB:
-- Windows y OSX: [FTDI Drivers](http://www.ftdichip.com/Drivers/VCP.htm)
-- Linux: Ya deben de estar incluidos en el kernel de tu distribución, si no es así, checa el link anterior.
-
-Clona este repositorio dentro de la carpeta "hardware" en la carpeta de sketchs de arduino, respetando el nombre "altair".
-Alternativamente puedes descargar el zip, descomprimirlo y copiarlo manualmente.
-(Si no existe la carpeta, créala)
-
-Ejemplo:
-```
-cd <dirección de tu carpeta personal>/Arduino/hardware/
-git clone https://github.com/makerlabmx/altair-arduinoide.git altair
-```
 
 ## Uso:
 
@@ -75,3 +60,6 @@ git clone https://github.com/makerlabmx/altair-arduinoide.git altair
 - Selecciona el puerto serial correspondiente en Herramientas > Port
 - Para ver un ejemplo del uso de las bibliotecas Aquila, selecciona Archivo > Ejemplos > AquilaProtocol > template
 - Sube el ejemplo con el ícono de flecha en el IDE
+
+El mejor lugar para hacer preguntas relacionadas con esta definición de hardware es el foro de la comunidad Aquila: http://community.aquila.io/.
+
