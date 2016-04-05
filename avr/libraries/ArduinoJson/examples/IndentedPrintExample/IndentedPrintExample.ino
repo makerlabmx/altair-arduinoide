@@ -1,43 +1,35 @@
-/*
- * Arduino JSON library - IndentedPrint example
- * Benoit Blanchon 2014 - MIT License
- */
+// Copyright Benoit Blanchon 2014-2016
+// MIT License
+//
+// Arduino JSON library
+// https://github.com/bblanchon/ArduinoJson
+// If you like this project, please add a star!
 
-#include <JsonGenerator.h>
+#include <ArduinoJson.h>
 
-using namespace ArduinoJson::Generator;
+using namespace ArduinoJson::Internals;
 
-void setup()
-{
-    Serial.begin(9600);
-    
-    JsonObject<1> json;
-    json["key"] = "value";
-    
-    IndentedPrint serial(Serial);    
-    serial.setTabSize(4);
-    
-    serial.println("This is at indentation 0");
-    serial.indent();
-    serial.println("This is at indentation 1");
-    serial.println("This is also at indentation 1");
-    serial.indent();
-    serial.println("This is at indentation 2");
-    
-    serial.println("You can print JSON here, as usual:");
-    serial.println(json);
-    serial.println();
-        
-    serial.println("But you can also prettyPrint JSON here:");
-    json.prettyPrintTo(serial);  
-    serial.println();
-    
-    serial.unindent();
-    serial.unindent();
-    serial.println("This is back at indentation 0");
+void setup() {
+  Serial.begin(9600);
+  while (!Serial) {
+    // wait serial port initialization
+  }
+
+  IndentedPrint serial(Serial);
+  serial.setTabSize(4);
+
+  serial.println("This is at indentation 0");
+  serial.indent();
+  serial.println("This is at indentation 1");
+  serial.println("This is also at indentation 1");
+  serial.indent();
+  serial.println("This is at indentation 2");
+
+  serial.unindent();
+  serial.unindent();
+  serial.println("This is back at indentation 0");
 }
 
-void loop()
-{
-
+void loop() {
+  // not used in this example
 }
