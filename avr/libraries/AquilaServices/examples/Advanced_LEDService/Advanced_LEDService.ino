@@ -2,10 +2,7 @@
 #include <Mesh.h>
 #include <AquilaProtocol.h>
 #include <AquilaServices.h>
-#include <JsonGenerator.h>
-#include <JsonParser.h>
-
-using namespace ArduinoJson;
+#include <ArduinoJson.h>
 
 /*
   LED Service Example:
@@ -54,9 +51,13 @@ void setLED(bool state)
 
 bool LEDService(uint16_t reqAddr, uint8_t method, char *data, uint8_t dataSize)
 {
+  // Determining jsonBuffer size, in this case we will only have one "object"
+  // More info: https://github.com/bblanchon/ArduinoJson/wiki/Memory%20model
+  const int BUFFER_SIZE = JSON_OBJECT_SIZE(1);
   if(method == GET)
   {
-    Generator::JsonObject<1> json;
+    StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+    JsonObject& json = jsonBuffer.createObject();
     json["isOn"] = edoLED;
     
     // creating a buffer with enough space for the generated json:
@@ -69,8 +70,8 @@ bool LEDService(uint16_t reqAddr, uint8_t method, char *data, uint8_t dataSize)
     if(dataSize > 0)
     {
       // Parsing request data:
-      Parser::JsonParser<32> parser;
-      Parser::JsonObject parsedJson = parser.parse(data);
+      StaticJsonBuffer<BUFFER_SIZE> parser;
+      JsonObject& parsedJson = parser.parseObject(data);
       if(!parsedJson.success()) { Services.response(reqAddr, R500); return false; }
       
       // Updating state:
@@ -80,7 +81,8 @@ bool LEDService(uint16_t reqAddr, uint8_t method, char *data, uint8_t dataSize)
       }
       
       // Returning new state:
-      Generator::JsonObject<1> json;
+      StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+      JsonObject& json = jsonBuffer.createObject();
       json["isOn"] = edoLED;
       
       // creating a buffer with enough space for the generated json:

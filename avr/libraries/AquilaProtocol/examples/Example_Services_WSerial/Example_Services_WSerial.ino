@@ -3,9 +3,7 @@
 #include <AquilaProtocol.h>
 #include <WSerial.h>
 #include <AquilaServices.h>
-#include <JsonGenerator.h>
-
-using namespace ArduinoJson::Generator;
+#include <ArduinoJson.h>
 
 /*
 Example_Services_WSerial
@@ -54,7 +52,11 @@ bool statusService(uint16_t reqAddr, uint8_t method, char *data, uint8_t dataSiz
   if(method == GET)
   {
     // Forming response:
-    JsonObject<1> json;
+    // Determining jsonBuffer size, in this case we will only have one number or "object"
+    // More info: https://github.com/bblanchon/ArduinoJson/wiki/Memory%20model
+    const int BUFFER_SIZE = JSON_OBJECT_SIZE(1);
+    StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+    JsonObject& json = jsonBuffer.createObject();
     json["intensity"] = currentIntensity;
 
     // We need to print the json to a buffer before sending

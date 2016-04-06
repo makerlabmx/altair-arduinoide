@@ -2,9 +2,7 @@
 #include <Mesh.h>
 #include <AquilaServices.h>
 #include <SimpleTimer.h>
-#include <JsonParser.h>
-
-using namespace ArduinoJson::Parser;
+#include <ArduinoJson.h>
 
 /*
 	Aquila Services Example:
@@ -48,8 +46,11 @@ void tempReqCb(uint16_t srcAddr, uint8_t status, char *data, uint8_t dataSize)
 		Serial.print("Response: "); Serial.println(data);
 
 		// Allocating enough memory for the parser
-		JsonParser<32> parser;
-		JsonObject json = parser.parse(data);
+		// Determining jsonBuffer size, in this case we are expecting only one number or "object"
+		// More info: https://github.com/bblanchon/ArduinoJson/wiki/Memory%20model
+		const int BUFFER_SIZE = JSON_OBJECT_SIZE(1);
+		StaticJsonBuffer<BUFFER_SIZE> parser;
+		JsonObject& json = parser.parseObject(data);
 		if(!json.success()) { Serial.println("Error parsing JSON"); return; }
 
 		Serial.print("Temperature: ");

@@ -2,9 +2,7 @@
 #include <Mesh.h>
 #include <AquilaServices.h>
 #include <AltairTemperature.h>
-#include <JsonGenerator.h>
-
-using namespace ArduinoJson::Generator;
+#include <ArduinoJson.h>
 
 /*
 	Aquila Services Example:
@@ -42,7 +40,11 @@ bool tempService(uint16_t reqAddr, uint8_t method, char *data, uint8_t dataSize)
 		Serial.println("Temperature service requested");
 		// getTempC from AltairTemperature library
 		float temp = getTempC();
-		JsonObject<1> json;
+		// Determining jsonBuffer size, in this case we will only have one number or "object"
+		// More info: https://github.com/bblanchon/ArduinoJson/wiki/Memory%20model
+		const int BUFFER_SIZE = JSON_OBJECT_SIZE(1);
+		StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+		JsonObject& json = jsonBuffer.createObject();
 		json["temp"] = temp;
 
 		// We need to print the json to a buffer before sending
