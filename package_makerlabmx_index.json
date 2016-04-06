@@ -13,42 +13,12 @@
           {
             "name": "Aquila Boards",
             "architecture": "avr",
-            "version": "0.2.1",
+            "version": "0.2.4",
             "category": "Aquila",
-            "url": "http://makerlabmx.github.io/altair-arduinoide/boards/altair-0.2.1.tar.bz2",
-            "archiveFileName": "altair-0.2.1.tar.bz2",
-            "checksum": "SHA-256:56c8f645d235f9adde15c93fc3ed26e4d8858af1ad5a1eaa90d6ba4eecb4b490",
-            "size": "148718",
-            "help": {
-              "online": "http://community.aquila.io"
-            },
-            "boards": [
-              {
-                "name": "Altair"
-              }
-            ],
-            "toolsDependencies": [
-              {
-                "packager": "arduino",
-                "name": "avr-gcc",
-                "version": "4.8.1-arduino5"
-              },
-              {
-                "packager": "arduino",
-                "name": "avrdude",
-                "version": "6.0.1-arduino5"
-              }
-            ]
-          },
-          {
-            "name": "Aquila Boards",
-            "architecture": "avr",
-            "version": "0.2.2",
-            "category": "Aquila",
-            "url": "http://makerlabmx.github.io/altair-arduinoide/boards/altair-0.2.2.tar.bz2",
-            "archiveFileName": "altair-0.2.2.tar.bz2",
-            "checksum": "SHA-256:f6bc82a0bc77a38cb695de1712922adfb7557da981f3297d658bdcf9925a829a",
-            "size": "977978",
+            "url": "http://makerlabmx.github.io/altair-arduinoide/boards/altair-0.2.4.tar.bz2",
+            "archiveFileName": "altair-0.2.4.tar.bz2",
+            "checksum": "SHA-256:6be33862c18d214593c1bf31350c387ea51debecee3a851d750c5a475d79da7c",
+            "size": "979142",
             "help": {
               "online": "http://community.aquila.io"
             },
